@@ -781,14 +781,20 @@ let state = {
   answered: false
 };
 
-// Simple localStorage helpers (demo - real version uses Firebase)
+// localStorage helpers — keyed by name so multiple users can share a device
+// Real version will use SQL Server backend
 function saveState() {
-  try { localStorage.setItem('hc250_state', JSON.stringify(state)); } catch(e) {}
+  try {
+    const key = 'hc250_' + state.name.toLowerCase().replace(/\s+/g, '_');
+    localStorage.setItem(key, JSON.stringify(state));
+  } catch(e) {}
 }
+
 function loadState(name) {
   try {
-    const s = JSON.parse(localStorage.getItem('hc250_state') || 'null');
-    if (s && s.name && s.name.toLowerCase() === name.toLowerCase()) return s;
+    const key = 'hc250_' + name.toLowerCase().replace(/\s+/g, '_');
+    const s = JSON.parse(localStorage.getItem(key) || 'null');
+    if (s && s.name) return s;
   } catch(e) {}
   return null;
 }
@@ -812,6 +818,7 @@ function handleLogin() {
   const pin  = document.getElementById('input-pin').value.trim();
   const err  = document.getElementById('login-error');
 
+  // Basic validation
   if (!name || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
     err.style.display = 'block';
     err.textContent = 'Please enter your full name and a 4-digit numeric PIN.';
@@ -820,11 +827,28 @@ function handleLogin() {
   err.style.display = 'none';
 
   const saved = loadState(name);
-  state = saved ? { ...saved } : {
-    name, pin, currentLesson: 0,
-    quizQuestions: [], currentQ: 0, score: 0, answered: false
-  };
-  state.name = name;
+
+  if (saved) {
+    // Returning user — check PIN matches
+    if (saved.pin !== pin) {
+      err.style.display = 'block';
+      err.textContent = 'Incorrect PIN for that name. If you have forgotten your PIN, please use a different name to start fresh.';
+      return;
+    }
+    // PIN matches — resume their session
+    state = { ...saved };
+    state.name = name;
+  } else {
+    // New user — create fresh session
+    state = {
+      name, pin,
+      currentLesson: 0,
+      quizQuestions: [], currentQ: 0,
+      score: 0, answered: false,
+      answers: {}, answerOrder: {}
+    };
+    saveState();
+  }
 
   showScreen('screen-lesson');
   renderLesson();

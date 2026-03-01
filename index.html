@@ -502,17 +502,22 @@
   .signout-bar.visible { display: block; }
   .signout-link {
     font-family: 'Cinzel', serif;
-    font-size: 0.62rem;
+    font-size: 0.65rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(244,234,213,0.45);
+    color: rgba(244,234,213,0.75);
     cursor: pointer;
     background: none;
-    border: none;
-    padding: 4px 0;
-    transition: color 0.2s;
+    border: 1px solid rgba(184,134,11,0.35);
+    border-radius: 2px;
+    padding: 4px 10px;
+    transition: all 0.2s;
   }
-  .signout-link:hover { color: var(--gold-lt); }
+  .signout-link:hover {
+    color: var(--gold-lt);
+    border-color: var(--gold-lt);
+    background: rgba(184,134,11,0.1);
+  }
 
   /* ── MODAL ── */
   .modal-overlay {

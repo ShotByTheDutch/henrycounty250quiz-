@@ -488,6 +488,32 @@
     display: none;
   }
 
+  /* ── SIGN OUT BAR ── */
+  .signout-bar {
+    display: none;
+    max-width: 680px;
+    width: 100%;
+    text-align: right;
+    margin-bottom: -18px;
+    padding-right: 4px;
+    position: relative;
+    z-index: 10;
+  }
+  .signout-bar.visible { display: block; }
+  .signout-link {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(244,234,213,0.45);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .signout-link:hover { color: var(--gold-lt); }
+
   /* ── MODAL ── */
   .modal-overlay {
     display: none;
@@ -552,6 +578,11 @@
   <h1>Henry County, Virginia<br>250th Anniversary</h1>
   <div class="subtitle">Colonel George Waller Chapter · Sons of the American Revolution</div>
 </header>
+
+<!-- ══════════════ SIGN OUT BAR ══════════════ -->
+<div class="signout-bar" id="signout-bar">
+  <button class="signout-link" onclick="signOut()">✦ Sign Out</button>
+</div>
 
 <!-- ══════════════ LOGIN SCREEN ══════════════ -->
 <div class="card" id="screen-login">
@@ -856,6 +887,8 @@ function saveState() {
   try {
     const key = 'hc250_' + state.name.toLowerCase().replace(/\s+/g, '_');
     localStorage.setItem(key, JSON.stringify(state));
+    // Track who is currently active on this browser
+    localStorage.setItem('hc250_current_user', state.name);
   } catch(e) {}
 }
 
@@ -868,6 +901,14 @@ function loadState(name) {
   return null;
 }
 
+function getCurrentUser() {
+  try { return localStorage.getItem('hc250_current_user') || null; } catch(e) { return null; }
+}
+
+function clearCurrentUser() {
+  try { localStorage.removeItem('hc250_current_user'); } catch(e) {}
+}
+
 // ═══════════════════════════════════════════════
 //  SCREENS
 // ═══════════════════════════════════════════════
@@ -876,7 +917,55 @@ function showScreen(id) {
     document.getElementById(s).style.display = 'none';
   });
   document.getElementById(id).style.display = 'block';
+  // Show sign-out bar on all screens except login
+  const bar = document.getElementById('signout-bar');
+  if (id === 'screen-login') {
+    bar.classList.remove('visible');
+  } else {
+    bar.classList.add('visible');
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════
+//  AUTO-RESUME ON PAGE LOAD
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const currentUser = getCurrentUser();
+  if (currentUser) {
+    const saved = loadState(currentUser);
+    if (saved) {
+      state = { ...saved };
+      if (state.completedAndPassed) {
+        showResults();
+      } else if (state.quizQuestions && state.quizQuestions.length > 0 && state.currentQ > 0) {
+        showScreen('screen-quiz');
+        renderQuestion();
+      } else {
+        showScreen('screen-lesson');
+        renderLesson();
+      }
+      return;
+    }
+  }
+  // No active session — show login
+  showScreen('screen-login');
+});
+
+// ═══════════════════════════════════════════════
+//  SIGN OUT
+// ═══════════════════════════════════════════════
+function signOut() {
+  showModal(
+    'This will sign you out. Your progress is saved and you can return anytime with your name and PIN.',
+    () => {
+      clearCurrentUser();
+      state = { name: '', currentLesson: 0, quizQuestions: [], currentQ: 0, score: 0, answered: false };
+      document.getElementById('input-name').value = '';
+      document.getElementById('input-pin').value = '';
+      showScreen('screen-login');
+    }
+  );
 }
 
 // ═══════════════════════════════════════════════

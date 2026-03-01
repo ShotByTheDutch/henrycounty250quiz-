@@ -838,6 +838,12 @@ function handleLogin() {
     // PIN matches — resume their session
     state = { ...saved };
     state.name = name;
+
+    // If they already passed, send them straight to their results
+    if (state.completedAndPassed) {
+      showResults();
+      return;
+    }
   } else {
     // New user — create fresh session
     state = {
@@ -845,7 +851,8 @@ function handleLogin() {
       currentLesson: 0,
       quizQuestions: [], currentQ: 0,
       score: 0, answered: false,
-      answers: {}, answerOrder: {}
+      answers: {}, answerOrder: {},
+      completedAndPassed: false
     };
     saveState();
   }
@@ -1052,16 +1059,37 @@ function showResults() {
     certNote.innerHTML = `Don't be discouraged! Review the lesson materials and try again. The questions rotate each attempt, giving you a fresh challenge every time.`;
   }
 
+  // Mark as passed so returning users go straight here
+  if (passed) {
+    state.completedAndPassed = true;
+    state.finalScore = state.score;
+    state.finalTotal = total;
+    saveState();
+  }
+
   showScreen('screen-results');
 }
 
 function retakeQuiz() {
+  const confirmed = confirm('This will reset your score and start a new quiz with fresh questions. Your passing record will be cleared. Are you sure you want to continue?');
+  if (!confirmed) return;
+  state.completedAndPassed = false;
   state.currentLesson = 0;
+  state.answers = {};
+  state.answerOrder = {};
+  saveState();
   startQuiz();
 }
 
 function goHome() {
+  const confirmed = confirm('This will reset your progress and return you to the beginning of the lessons. Your passing record will be cleared. Are you sure you want to continue?');
+  if (!confirmed) return;
+  state.completedAndPassed = false;
   state.currentLesson = 0;
+  state.answers = {};
+  state.answerOrder = {};
+  state.score = 0;
+  saveState();
   showScreen('screen-lesson');
   renderLesson();
 }

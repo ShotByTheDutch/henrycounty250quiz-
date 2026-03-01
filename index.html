@@ -605,11 +605,27 @@
     <input type="text" id="input-name" placeholder="e.g. Thomas Jefferson" autocomplete="off">
   </div>
   <div class="field-group">
+    <label for="input-email">Email Address</label>
+    <input type="email" id="input-email" placeholder="e.g. thomas@example.com" autocomplete="off">
+    <p class="field-hint">Used to contact you about your certificate. Not shared publicly.</p>
+  </div>
+  <div class="field-group">
+    <label for="input-phone">Phone Number</label>
+    <input type="tel" id="input-phone" placeholder="e.g. 276-555-0100" autocomplete="off">
+  </div>
+  <div class="field-group">
     <label for="input-pin">4-Digit PIN</label>
     <input type="password" id="input-pin" placeholder="••••" maxlength="4" inputmode="numeric">
     <p class="field-hint">First time? Choose any 4 digits to remember. Returning? Enter your same PIN to resume.</p>
   </div>
-  <p class="error-msg" id="login-error">Please enter your name and a 4-digit PIN.</p>
+
+  <!-- Honeypot — hidden from humans, bots fill it in -->
+  <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">
+    <label for="input-website">Website</label>
+    <input type="text" id="input-website" name="website" tabindex="-1" autocomplete="off">
+  </div>
+
+  <p class="error-msg" id="login-error">Please fill in all fields.</p>
 
   <div style="margin-top:8px;">
     <button class="btn btn-primary" onclick="handleLogin()">Enter the Course →</button>
@@ -969,6 +985,8 @@ function signOut() {
       clearCurrentUser();
       state = { name: '', currentLesson: 0, quizQuestions: [], currentQ: 0, score: 0, answered: false };
       document.getElementById('input-name').value = '';
+      document.getElementById('input-email').value = '';
+      document.getElementById('input-phone').value = '';
       document.getElementById('input-pin').value = '';
       showScreen('screen-login');
     }
@@ -979,14 +997,38 @@ function signOut() {
 //  LOGIN
 // ═══════════════════════════════════════════════
 function handleLogin() {
-  const name = document.getElementById('input-name').value.trim();
-  const pin  = document.getElementById('input-pin').value.trim();
-  const err  = document.getElementById('login-error');
+  const name    = document.getElementById('input-name').value.trim();
+  const email   = document.getElementById('input-email').value.trim();
+  const phone   = document.getElementById('input-phone').value.trim();
+  const pin     = document.getElementById('input-pin').value.trim();
+  const honeypot = document.getElementById('input-website').value.trim();
+  const err     = document.getElementById('login-error');
+
+  // Honeypot check — bots fill this field, humans never see it
+  if (honeypot) {
+    // Silently reject — don't tell them why
+    return;
+  }
 
   // Basic validation
-  if (!name || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+  if (!name) {
     err.style.display = 'block';
-    err.textContent = 'Please enter your full name and a 4-digit numeric PIN.';
+    err.textContent = 'Please enter your full name.';
+    return;
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    err.style.display = 'block';
+    err.textContent = 'Please enter a valid email address.';
+    return;
+  }
+  if (!phone) {
+    err.style.display = 'block';
+    err.textContent = 'Please enter your phone number.';
+    return;
+  }
+  if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+    err.style.display = 'block';
+    err.textContent = 'Please enter a 4-digit numeric PIN.';
     return;
   }
   err.style.display = 'none';
@@ -1000,9 +1042,12 @@ function handleLogin() {
       err.textContent = 'Incorrect PIN for that name. If you have forgotten your PIN, please use a different name to start fresh.';
       return;
     }
-    // PIN matches — resume their session
+    // PIN matches — resume their session, update contact info in case it changed
     state = { ...saved };
-    state.name = name;
+    state.name  = name;
+    state.email = email;
+    state.phone = phone;
+    saveState();
 
     // If they already passed, send them straight to their results
     if (state.completedAndPassed) {
@@ -1010,9 +1055,9 @@ function handleLogin() {
       return;
     }
   } else {
-    // New user — create fresh session
+    // New user — create fresh session with contact info
     state = {
-      name, pin,
+      name, email, phone, pin,
       currentLesson: 0,
       quizQuestions: [], currentQ: 0,
       score: 0, answered: false,
@@ -1260,6 +1305,8 @@ function sendPassEmail(name, score, total) {
 
   const templateParams = {
     user_name:       name,
+    user_email:      state.email || 'Not provided',
+    user_phone:      state.phone || 'Not provided',
     user_score:      score + ' out of ' + total + ' (' + pct + '%)',
     completion_date: dateStr
   };

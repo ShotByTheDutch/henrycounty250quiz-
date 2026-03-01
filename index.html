@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Henry County 250th Anniversary Quiz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  (function(){ emailjs.init({ publicKey: "GLG0QWSWuBM2bAeqW" }); })();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1221,14 +1225,44 @@ function showResults() {
   }
 
   // Mark as passed so returning users go straight here
-  if (passed) {
+  if (passed && !state.completedAndPassed) {
     state.completedAndPassed = true;
     state.finalScore = state.score;
     state.finalTotal = total;
     saveState();
+    // Fire notification email to chapter — first pass only
+    sendPassEmail(state.name, state.score, total);
+  } else if (passed) {
+    saveState();
   }
 
   showScreen('screen-results');
+}
+
+// ═══════════════════════════════════════════════
+//  EMAILJS NOTIFICATION
+// ═══════════════════════════════════════════════
+function sendPassEmail(name, score, total) {
+  const pct = Math.round((score / total) * 100);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  const templateParams = {
+    user_name:       name,
+    user_score:      score + ' out of ' + total + ' (' + pct + '%)',
+    completion_date: dateStr
+  };
+
+  emailjs.send('service_immj0jg', 'template_mneo0hm', templateParams)
+    .then(() => {
+      console.log('Certificate notification sent.');
+    })
+    .catch((err) => {
+      console.warn('Email notification failed:', err);
+      // Silently fails — does not affect user experience
+    });
 }
 
 // ═══════════════════════════════════════════════

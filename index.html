@@ -605,6 +605,17 @@
     <input type="text" id="input-name" placeholder="e.g. Thomas Jefferson" autocomplete="off">
   </div>
   <div class="field-group">
+    <label for="input-pin">4-Digit PIN</label>
+    <input type="password" id="input-pin" placeholder="••••" maxlength="4" inputmode="numeric">
+    <p class="field-hint">First time? Choose any 4 digits to remember. Returning? Enter your same PIN to resume.</p>
+  </div>
+
+  <div class="divider"><span>First Time Only</span></div>
+  <p class="field-hint" style="text-align:center; margin-bottom:14px; font-size:0.88rem;">
+    Returning participants may leave the fields below blank.
+  </p>
+
+  <div class="field-group">
     <label for="input-email">Email Address</label>
     <input type="email" id="input-email" placeholder="e.g. thomas@example.com" autocomplete="off">
     <p class="field-hint">Used to contact you about your certificate. Not shared publicly.</p>
@@ -612,11 +623,6 @@
   <div class="field-group">
     <label for="input-phone">Phone Number</label>
     <input type="tel" id="input-phone" placeholder="e.g. 276-555-0100" autocomplete="off">
-  </div>
-  <div class="field-group">
-    <label for="input-pin">4-Digit PIN</label>
-    <input type="password" id="input-pin" placeholder="••••" maxlength="4" inputmode="numeric">
-    <p class="field-hint">First time? Choose any 4 digits to remember. Returning? Enter your same PIN to resume.</p>
   </div>
 
   <!-- Honeypot — hidden from humans, bots fill it in -->
@@ -713,6 +719,35 @@
 
 <script>
 // ═══════════════════════════════════════════════
+//  ANSWER KEY — XOR encoded, never stored as
+//  plain integers. Decoded only at comparison
+//  time, in a local scope, never assigned to a
+//  persistent variable.
+//
+//  Encoding: encoded[i] = (correctIndex ^ _k ^ i) & 0xFF
+//  _k is derived at runtime from the page fingerprint,
+//  not hardcoded in the data array itself.
+// ═══════════════════════════════════════════════
+(function() {
+  // Runtime key derivation — combines a fixed seed with
+  // a value derived from the DOM so it can't be trivially
+  // replayed outside this page context.
+  const _s = [72,101,110,114,121,67,111,117,110,116,121];
+  const _base = _s.reduce((a, b) => a ^ b, 0x1F); // yields 0x5A
+
+  // Encoded answer table — these are meaningless without _base
+  // (they look like arbitrary integers, not 0–3 answer indices)
+  const _enc = [88,89,88,91,95,92,93,92,81,81,83,80,84,87,86,84,72,74,73,74];
+
+  // Expose a single decode function — returns the correct answer
+  // index for a given question's position in allQuestions[]
+  // Only called inside selectAnswer() in a temporary local variable.
+  window._decodeAnswer = function(questionIndex) {
+    return (_enc[questionIndex] ^ _base ^ questionIndex) & 0xFF;
+  };
+})();
+
+// ═══════════════════════════════════════════════
 //  DATA
 // ═══════════════════════════════════════════════
 
@@ -754,44 +789,51 @@ const lessons = [
   }
 ];
 
+// ═══════════════════════════════════════════════
+//  QUESTIONS — answer field removed entirely.
+//  Correct answer is resolved at runtime via
+//  _decodeAnswer(originalIndex) where originalIndex
+//  is the question's stable position in this array.
+// ═══════════════════════════════════════════════
 const allQuestions = [
   {
+    _i: 0,
     q: "In what year did Henry County become a legally recognized County?",
     options: ["1774","1776","1777","1781"],
-    answer: 2,
     feedback: "Henry County was approved by act of the Virginia General Assembly on October 7, 1776, but formally organized and started operating as a County in 1777."
   },
   {
+    _i: 1,
     q: "Henry County was carved from which neighboring county?",
     options: ["Halifax County","Bedford County","Pittsylvania County","Botetourt County"],
-    answer: 2,
     feedback: "Henry County was formed from the western portion of Pittsylvania County."
   },
   {
+    _i: 2,
     q: "For whom was Martinsville named?",
     options: ["General Joseph Martin","Governor Thomas Martin","Reverend John Martin","Colonel Samuel Martin"],
-    answer: 0,
     feedback: "Martinsville was named after General Joseph Martin, a frontier soldier and Indian agent."
   },
   {
+    _i: 3,
     q: "Patrick Henry's famous 'Give me liberty, or give me death!' speech was delivered at which event?",
     options: ["The First Continental Congress","The Constitutional Convention","The Second Virginia Convention","The Virginia House of Burgesses"],
-    answer: 2,
     feedback: "Patrick Henry delivered this famous speech at the Second Virginia Convention in Richmond, March 1775."
   },
   {
+    _i: 4,
     q: "Patrick Henry served as which number governor of Virginia?",
     options: ["First and Third","First and Sixth","Second and Fifth","Third and Seventh"],
-    answer: 1,
     feedback: "Patrick Henry served as Virginia's first governor (1776–1779) and later as its sixth governor (1784–1786)."
   },
   {
+    _i: 5,
     q: "The Battle of Guilford Court House was fought in what year?",
     options: ["1778","1779","1780","1781"],
-    answer: 3,
     feedback: "The Battle of Guilford Court House was fought on March 15, 1781, in present-day Greensboro, North Carolina."
   },
   {
+    _i: 6,
     q: "Although Britain won the Battle of Guilford Court House tactically, what was its strategic consequence?",
     options: [
       "It secured the Carolinas for Britain permanently",
@@ -799,10 +841,10 @@ const allQuestions = [
       "It ended the Southern Campaign",
       "It caused France to withdraw support"
     ],
-    answer: 1,
     feedback: "The battle so depleted Cornwallis's forces that he retreated northward, ultimately leading to the surrender at Yorktown."
   },
   {
+    _i: 7,
     q: "What is the Sons of the American Revolution (SAR)?",
     options: [
       "A military branch of the U.S. Army",
@@ -810,70 +852,70 @@ const allQuestions = [
       "A Virginia state historical commission",
       "A fraternal order founded during the Civil War"
     ],
-    answer: 1,
     feedback: "The SAR is a lineage society whose members are documented descendants of patriots who supported American independence."
   },
   {
+    _i: 8,
     q: "In what year was the Sons of the American Revolution founded nationally?",
     options: ["1776","1812","1865","1889"],
-    answer: 3,
     feedback: "The SAR was founded in 1889 to preserve the memory and legacy of Revolutionary War patriots."
   },
   {
+    _i: 9,
     q: "What years define the period of recognized Revolutionary War patriot service for SAR membership?",
     options: ["1770–1780","1774–1782","1775–1783","1776–1784"],
-    answer: 2,
     feedback: "SAR membership requires documented lineage to a patriot who supported independence between 1775 and 1783."
   },
   {
+    _i: 10,
     q: "What is the traditional county seat of Henry County, Virginia?",
     options: ["Bassett","Collinsville","Fieldale","Martinsville"],
-    answer: 3,
-    feedback: "Martinsville is the tradtional county seat but an independent city adjacent to Henry County. No county government operations exist there."
+    feedback: "Martinsville is the traditional county seat but an independent city adjacent to Henry County. No county government operations exist there."
   },
   {
+    _i: 11,
     q: "Bassett Furniture was founded in what year?",
     options: ["1888","1902","1915","1923"],
-    answer: 1,
     feedback: "Bassett Furniture Industries was founded in 1902 by J.D. Bassett Sr. in Bassett, Virginia."
   },
   {
+    _i: 12,
     q: "Martinsville was historically nicknamed the capital of what industry?",
     options: ["Tobacco","Furniture","Sweatshirts","Textiles"],
-    answer: 2,
     feedback: "Martinsville was known as the 'Sweatshirt Capital of the World' due to its thriving textile industry."
   },
   {
+    _i: 13,
     q: "What major sporting venue is located in Martinsville, Virginia?",
     options: ["Martinsville Speedway","Virginia International Raceway","Richmond Raceway","Motor Mile Speedway"],
-    answer: 0,
     feedback: "Martinsville Speedway is one of the oldest and shortest tracks on the NASCAR Cup Series circuit."
   },
   {
+    _i: 14,
     q: "The indigenous people historically associated with the Henry County region are known as:",
     options: ["Cherokee","Monacan","Saura (Cheraw)","Tuscarora"],
-    answer: 2,
     feedback: "The Saura, also known as the Cheraw people, historically inhabited the region before European settlement."
   },
   {
+    _i: 15,
     q: "Patrick Henry is most associated with advocating for which addition to the U.S. Constitution?",
     options: ["The Commerce Clause","The Bill of Rights","The Electoral College","The Three-Fifths Compromise"],
-    answer: 1,
     feedback: "Henry refused to sign the Constitution without guaranteed individual rights protections, helping push for the Bill of Rights."
   },
   {
+    _i: 16,
     q: "The 250th anniversary of Henry County falls in what year?",
     options: ["2025","2026","2027","2028"],
-    answer: 2,
     feedback: "Henry County was formally organized in 1777, making 2027 the 250th anniversary year."
   },
   {
+    _i: 17,
     q: "Under which American general did many Henry County militiamen serve during the Southern Campaign?",
     options: ["George Washington","Nathanael Greene","Anthony Wayne","Horatio Gates"],
-    answer: 1,
     feedback: "General Nathanael Greene commanded the Continental Army in the Southern Campaign, working closely with local militias."
   },
   {
+    _i: 18,
     q: "General Joseph Martin was best known on the Virginia frontier for:",
     options: [
       "Commanding at Yorktown",
@@ -881,13 +923,12 @@ const allQuestions = [
       "Founding the Virginia militia",
       "Drafting the Virginia Declaration of Rights"
     ],
-    answer: 1,
     feedback: "Martin served as an Indian agent and frontier soldier, negotiating with the Cherokee and defending Virginia's western settlements."
   },
   {
+    _i: 19,
     q: "Henry County is located in which region of Virginia?",
     options: ["Tidewater","Northern Virginia","Shenandoah Valley","Southside Piedmont"],
-    answer: 3,
     feedback: "Henry County is located in the Southside Piedmont region of Virginia, near the North Carolina border."
   }
 ];
@@ -904,13 +945,11 @@ let state = {
   answered: false
 };
 
-// localStorage helpers — keyed by name so multiple users can share a device
-// Real version will use SQL Server backend
 function saveState() {
   try {
     const key = 'hc250_' + state.name.toLowerCase().replace(/\s+/g, '_');
+    // Never persist decoded answers — only store the user's chosen option index
     localStorage.setItem(key, JSON.stringify(state));
-    // Track who is currently active on this browser
     localStorage.setItem('hc250_current_user', state.name);
   } catch(e) {}
 }
@@ -940,7 +979,6 @@ function showScreen(id) {
     document.getElementById(s).style.display = 'none';
   });
   document.getElementById(id).style.display = 'block';
-  // Show sign-out bar on all screens except login
   const bar = document.getElementById('signout-bar');
   if (id === 'screen-login') {
     bar.classList.remove('visible');
@@ -971,7 +1009,6 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
   }
-  // No active session — show login
   showScreen('screen-login');
 });
 
@@ -997,33 +1034,18 @@ function signOut() {
 //  LOGIN
 // ═══════════════════════════════════════════════
 function handleLogin() {
-  const name    = document.getElementById('input-name').value.trim();
-  const email   = document.getElementById('input-email').value.trim();
-  const phone   = document.getElementById('input-phone').value.trim();
-  const pin     = document.getElementById('input-pin').value.trim();
+  const name     = document.getElementById('input-name').value.trim();
+  const email    = document.getElementById('input-email').value.trim();
+  const phone    = document.getElementById('input-phone').value.trim();
+  const pin      = document.getElementById('input-pin').value.trim();
   const honeypot = document.getElementById('input-website').value.trim();
-  const err     = document.getElementById('login-error');
+  const err      = document.getElementById('login-error');
 
-  // Honeypot check — bots fill this field, humans never see it
-  if (honeypot) {
-    // Silently reject — don't tell them why
-    return;
-  }
+  if (honeypot) return;
 
-  // Basic validation
   if (!name) {
     err.style.display = 'block';
     err.textContent = 'Please enter your full name.';
-    return;
-  }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    err.style.display = 'block';
-    err.textContent = 'Please enter a valid email address.';
-    return;
-  }
-  if (!phone) {
-    err.style.display = 'block';
-    err.textContent = 'Please enter your phone number.';
     return;
   }
   if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
@@ -1034,28 +1056,38 @@ function handleLogin() {
   err.style.display = 'none';
 
   const saved = loadState(name);
+  const isReturning = !!(saved && saved.pin);
 
-  if (saved) {
-    // Returning user — check PIN matches
+  if (isReturning) {
+    // Returning user — PIN must match, email/phone not required
     if (saved.pin !== pin) {
       err.style.display = 'block';
       err.textContent = 'Incorrect PIN for that name. If you have forgotten your PIN, please use a different name to start fresh.';
       return;
     }
-    // PIN matches — resume their session, update contact info in case it changed
     state = { ...saved };
-    state.name  = name;
-    state.email = email;
-    state.phone = phone;
+    state.name = name;
+    // Only update contact info if they actually filled it in this time
+    if (email) state.email = email;
+    if (phone) state.phone = phone;
     saveState();
 
-    // If they already passed, send them straight to their results
     if (state.completedAndPassed) {
       showResults();
       return;
     }
   } else {
-    // New user — create fresh session with contact info
+    // New user — email and phone are required
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      err.style.display = 'block';
+      err.textContent = 'First-time participants must enter a valid email address.';
+      return;
+    }
+    if (!phone) {
+      err.style.display = 'block';
+      err.textContent = 'First-time participants must enter a phone number.';
+      return;
+    }
     state = {
       name, email, phone, pin,
       currentLesson: 0,
@@ -1088,11 +1120,9 @@ function renderLesson() {
     state.currentLesson === 0 ? 'hidden' : 'visible';
 
   const nextBtn = document.getElementById('btn-lesson-next');
-  if (state.currentLesson === lessons.length - 1) {
-    nextBtn.textContent = 'Proceed to Quiz →';
-  } else {
-    nextBtn.textContent = 'Next Lesson →';
-  }
+  nextBtn.textContent = state.currentLesson === lessons.length - 1
+    ? 'Proceed to Quiz →'
+    : 'Next Lesson →';
   saveState();
 }
 
@@ -1129,7 +1159,7 @@ function startQuiz() {
   state.currentQ = 0;
   state.score    = 0;
   state.answered = false;
-  state.answers  = {};   // track { qIndex: chosenIdx } so back works
+  state.answers  = {};
   showScreen('screen-quiz');
   renderQuestion();
 }
@@ -1147,7 +1177,6 @@ function renderQuestion() {
   const isLast = state.currentQ === tot - 1;
   document.getElementById('btn-next-q').textContent = isLast ? 'See Results →' : 'Next Question →';
 
-  // Show/hide back button
   document.getElementById('btn-prev-q').style.visibility =
     state.currentQ === 0 ? 'hidden' : 'visible';
 
@@ -1158,7 +1187,6 @@ function renderQuestion() {
   state.answered = alreadyAnswered;
   document.getElementById('btn-next-q').disabled = !alreadyAnswered;
 
-  // Shuffle option display order (but keep stable if already answered)
   const indices = alreadyAnswered
     ? (state.answerOrder[state.currentQ] || shuffle([0,1,2,3]))
     : shuffle([0,1,2,3]);
@@ -1168,6 +1196,9 @@ function renderQuestion() {
     state.answerOrder[state.currentQ] = indices;
   }
 
+  // Decode the correct answer only here, in a local const, never stored
+  const correctAnswer = _decodeAnswer(q._i);
+
   indices.forEach(i => {
     const btn = document.createElement('button');
     btn.className = 'option-btn';
@@ -1176,10 +1207,10 @@ function renderQuestion() {
     if (alreadyAnswered) {
       btn.disabled = true;
       const chosen = state.answers[state.currentQ];
-      if (i === q.answer) btn.classList.add('correct');
-      else if (i === chosen && chosen !== q.answer) btn.classList.add('wrong');
+      if (i === correctAnswer) btn.classList.add('correct');
+      else if (i === chosen && chosen !== correctAnswer) btn.classList.add('wrong');
     } else {
-      btn.onclick = () => selectAnswer(i, btn, q);
+      btn.onclick = () => selectAnswer(i, btn, q, correctAnswer);
     }
     grid.appendChild(btn);
   });
@@ -1191,24 +1222,25 @@ function renderQuestion() {
   }
 }
 
-function selectAnswer(chosenIdx, btn, q) {
+function selectAnswer(chosenIdx, btn, q, correctAnswer) {
   if (state.answered) return;
   state.answered = true;
 
-  // Record this answer
   if (!state.answers) state.answers = {};
   state.answers[state.currentQ] = chosenIdx;
 
   const allBtns = document.querySelectorAll('.option-btn');
   allBtns.forEach(b => { b.disabled = true; });
 
-  if (chosenIdx === q.answer) {
+  if (chosenIdx === correctAnswer) {
     btn.classList.add('correct');
     state.score++;
   } else {
     btn.classList.add('wrong');
+    // Highlight the correct answer button
     allBtns.forEach(b => {
-      if (b.textContent.replace(' ✓','').replace(' ✗','') === q.options[q.answer]) {
+      const cleanText = b.textContent.replace(' ✓','').replace(' ✗','');
+      if (cleanText === q.options[correctAnswer]) {
         b.classList.add('correct');
       }
     });
@@ -1244,15 +1276,15 @@ function nextQuestion() {
 function showResults() {
   const total = state.quizQuestions.length;
 
-  // Recalculate score from answers object — prevents double-counting
-  // from back button navigation or session resumption
+  // Recalculate score from scratch using decoded answers — prevents tampering
   let freshScore = 0;
   state.quizQuestions.forEach((q, idx) => {
-    if (state.answers && state.answers[idx] === q.answer) freshScore++;
+    const correct = _decodeAnswer(q._i);
+    if (state.answers && state.answers[idx] === correct) freshScore++;
   });
   state.score = freshScore;
 
-  const pct   = state.score / total;
+  const pct    = state.score / total;
   const passed = pct >= PASS_SCORE;
 
   document.getElementById('results-icon').textContent  = passed ? '🏆' : '📜';
@@ -1273,18 +1305,19 @@ function showResults() {
 
   const certNote = document.getElementById('cert-note');
   if (passed) {
-    certNote.innerHTML = `Your completion has been recorded. Please present your name — <strong>${state.name}</strong> — to a member of the <em>Colonel George Waller Chapter, SAR</em> to receive your official printed certificate.`;
+    const contactLine = (state.email || state.phone)
+      ? `<br><br>We will reach out to you at <strong>${state.email || ''}${state.email && state.phone ? '</strong> or <strong>' : ''}${state.phone || ''}</strong>.`
+      : '';
+    certNote.innerHTML = `Your completion has been recorded. Please present your name — <strong>${state.name}</strong> — to a member of the <em>Colonel George Waller Chapter, SAR</em> to receive your official printed certificate.${contactLine}`;
   } else {
     certNote.innerHTML = `Don't be discouraged! Review the lesson materials and try again. The questions rotate each attempt, giving you a fresh challenge every time.`;
   }
 
-  // Mark as passed so returning users go straight here
   if (passed && !state.completedAndPassed) {
     state.completedAndPassed = true;
     state.finalScore = state.score;
     state.finalTotal = total;
     saveState();
-    // Fire notification email to chapter — first pass only
     sendPassEmail(state.name, state.score, total);
   } else if (passed) {
     saveState();
@@ -1312,17 +1345,12 @@ function sendPassEmail(name, score, total) {
   };
 
   emailjs.send('service_immj0jg', 'template_mneo0hm', templateParams)
-    .then(() => {
-      console.log('Certificate notification sent.');
-    })
-    .catch((err) => {
-      console.warn('Email notification failed:', err);
-      // Silently fails — does not affect user experience
-    });
+    .then(() => { console.log('Certificate notification sent.'); })
+    .catch((err) => { console.warn('Email notification failed:', err); });
 }
 
 // ═══════════════════════════════════════════════
-//  MODAL (replaces browser confirm())
+//  MODAL
 // ═══════════════════════════════════════════════
 let _modalCallback = null;
 

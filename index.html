@@ -487,6 +487,62 @@
     margin-top: 6px;
     display: none;
   }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 12, 4, 0.75);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.visible {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-box {
+    background: var(--parchment);
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px var(--gold), 0 20px 60px rgba(0,0,0,0.6);
+    max-width: 420px;
+    width: 100%;
+    padding: 36px 36px 28px;
+    text-align: center;
+    position: relative;
+  }
+  .modal-icon { font-size: 2rem; margin-bottom: 12px; }
+  .modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    color: var(--crimson);
+    margin-bottom: 12px;
+  }
+  .modal-message {
+    font-family: 'EB Garamond', serif;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--ink-lt);
+    margin-bottom: 24px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .btn-danger {
+    background: linear-gradient(135deg, var(--crimson), #6b1010);
+    color: var(--parchment);
+    box-shadow: 0 2px 8px rgba(139,26,26,0.3);
+    padding: 10px 24px;
+    font-size: 0.78rem;
+  }
+  .btn-danger:hover { background: linear-gradient(135deg, #a01f1f, #7a1212); }
 </style>
 </head>
 <body>
@@ -583,6 +639,19 @@
   <div class="results-actions">
     <button class="btn btn-nav" onclick="retakeQuiz()">Retake Quiz</button>
     <button class="btn btn-primary" onclick="goHome()">Return to Lessons</button>
+  </div>
+</div>
+
+<!-- ══════════════ CONFIRM MODAL ══════════════ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title" id="modal-title">Are You Sure?</div>
+    <div class="modal-message" id="modal-message"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="modalCancel()">Cancel</button>
+      <button class="btn btn-danger" onclick="modalConfirm()">Yes, Continue</button>
+    </div>
   </div>
 </div>
 
@@ -1070,28 +1139,54 @@ function showResults() {
   showScreen('screen-results');
 }
 
+// ═══════════════════════════════════════════════
+//  MODAL (replaces browser confirm())
+// ═══════════════════════════════════════════════
+let _modalCallback = null;
+
+function showModal(message, onConfirm) {
+  document.getElementById('modal-message').textContent = message;
+  document.getElementById('modal-overlay').classList.add('visible');
+  _modalCallback = onConfirm;
+}
+function modalConfirm() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+  if (_modalCallback) _modalCallback();
+  _modalCallback = null;
+}
+function modalCancel() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+  _modalCallback = null;
+}
+
 function retakeQuiz() {
-  const confirmed = confirm('This will reset your score and start a new quiz with fresh questions. Your passing record will be cleared. Are you sure you want to continue?');
-  if (!confirmed) return;
-  state.completedAndPassed = false;
-  state.currentLesson = 0;
-  state.answers = {};
-  state.answerOrder = {};
-  saveState();
-  startQuiz();
+  showModal(
+    'This will reset your score and start a new quiz with fresh questions. Your passing record will be cleared.',
+    () => {
+      state.completedAndPassed = false;
+      state.currentLesson = 0;
+      state.answers = {};
+      state.answerOrder = {};
+      saveState();
+      startQuiz();
+    }
+  );
 }
 
 function goHome() {
-  const confirmed = confirm('This will reset your progress and return you to the beginning of the lessons. Your passing record will be cleared. Are you sure you want to continue?');
-  if (!confirmed) return;
-  state.completedAndPassed = false;
-  state.currentLesson = 0;
-  state.answers = {};
-  state.answerOrder = {};
-  state.score = 0;
-  saveState();
-  showScreen('screen-lesson');
-  renderLesson();
+  showModal(
+    'This will reset your progress and return you to the beginning of the lessons. Your passing record will be cleared.',
+    () => {
+      state.completedAndPassed = false;
+      state.currentLesson = 0;
+      state.answers = {};
+      state.answerOrder = {};
+      state.score = 0;
+      saveState();
+      showScreen('screen-lesson');
+      renderLesson();
+    }
+  );
 }
 </script>
 </body>

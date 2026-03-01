@@ -1198,6 +1198,15 @@ function nextQuestion() {
 // ═══════════════════════════════════════════════
 function showResults() {
   const total = state.quizQuestions.length;
+
+  // Recalculate score from answers object — prevents double-counting
+  // from back button navigation or session resumption
+  let freshScore = 0;
+  state.quizQuestions.forEach((q, idx) => {
+    if (state.answers && state.answers[idx] === q.answer) freshScore++;
+  });
+  state.score = freshScore;
+
   const pct   = state.score / total;
   const passed = pct >= PASS_SCORE;
 

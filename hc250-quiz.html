@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Henry County 250th Anniversary Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment:     #f4ead5;
+    --parchment-dk:  #e8d8b0;
+    --ink:           #1a110a;
+    --ink-lt:        #3d2b1f;
+    --crimson:       #8b1a1a;
+    --gold:          #b8860b;
+    --gold-lt:       #d4a017;
+    --sage:          #4a5e3a;
+    --border:        #8b6914;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: #2a1f0e;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 30px 16px 60px;
+    font-family: 'EB Garamond', serif;
+    color: var(--ink);
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    text-align: center;
+    margin-bottom: 32px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .seal-ring {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 0 6px rgba(184,134,11,0.2), 0 0 20px rgba(184,134,11,0.15);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    background: radial-gradient(circle at 40% 35%, #c8a84b, #7a5c0a);
+    font-size: 2.4rem;
+  }
+
+  .site-header h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.1rem, 3.5vw, 1.7rem);
+    color: var(--parchment);
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  }
+
+  .site-header .subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    color: var(--gold-lt);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--parchment);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    box-shadow:
+      inset 0 0 60px rgba(139,105,20,0.12),
+      0 8px 40px rgba(0,0,0,0.5),
+      0 2px 0 var(--gold);
+    max-width: 680px;
+    width: 100%;
+    padding: 40px 44px;
+    position: relative;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  .card::before, .card::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold);
+    font-size: 1rem;
+    opacity: 0.6;
+  }
+  .card::before { top: 12px; left: 16px; }
+  .card::after  { bottom: 12px; right: 16px; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 18px 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .divider span {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #screen-login { display: block; }
+
+  .login-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.35rem;
+    color: var(--crimson);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .login-intro {
+    font-size: 1rem;
+    color: var(--ink-lt);
+    text-align: center;
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+
+  .field-group { margin-bottom: 18px; }
+  .field-group label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-lt);
+    margin-bottom: 6px;
+  }
+  .field-group input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: rgba(255,255,255,0.55);
+    font-family: 'EB Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field-group input:focus {
+    border-color: var(--crimson);
+    box-shadow: 0 0 0 3px rgba(139,26,26,0.12);
+  }
+  .field-hint {
+    font-size: 0.82rem;
+    color: #7a6040;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none; border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 12px 28px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--crimson), #6b1010);
+    color: var(--parchment);
+    box-shadow: 0 3px 12px rgba(139,26,26,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 14px;
+  }
+  .btn-primary:hover { background: linear-gradient(135deg, #a01f1f, #7a1212); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(139,26,26,0.4); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink-lt);
+    border: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+  .btn-secondary:hover { background: rgba(139,105,20,0.08); }
+
+  .btn-nav {
+    background: var(--sage);
+    color: var(--parchment);
+    box-shadow: 0 2px 8px rgba(74,94,58,0.3);
+    font-size: 0.8rem;
+    padding: 10px 22px;
+  }
+  .btn-nav:hover { background: #3a4e2a; transform: translateY(-1px); }
+  .btn-nav:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── LESSON SCREEN ── */
+  #screen-lesson { display: none; }
+
+  .progress-bar-wrap {
+    background: var(--parchment-dk);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    height: 8px;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sage), var(--gold));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+  .progress-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+    text-align: right;
+    margin-bottom: 16px;
+  }
+
+  .lesson-chapter {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .lesson-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1rem, 3vw, 1.35rem);
+    color: var(--crimson);
+    line-height: 1.3;
+    margin-bottom: 14px;
+  }
+  .lesson-body {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--ink-lt);
+    margin-bottom: 20px;
+  }
+  .lesson-body p { margin-bottom: 12px; }
+  .lesson-body strong { color: var(--ink); font-weight: 600; }
+
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  /* ── QUIZ SCREEN ── */
+  #screen-quiz { display: none; }
+
+  .quiz-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .quiz-counter {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .quiz-score-live {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    color: var(--sage);
+    letter-spacing: 0.1em;
+  }
+
+  .question-text {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    color: var(--ink);
+    line-height: 1.5;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(139,105,20,0.3);
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 480px) { .options-grid { grid-template-columns: 1fr; } }
+
+  .option-btn {
+    text-align: left;
+    background: rgba(255,255,255,0.45);
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-family: 'EB Garamond', serif;
+    font-size: 0.97rem;
+    color: var(--ink-lt);
+    line-height: 1.4;
+    transition: all 0.18s;
+    position: relative;
+  }
+  .option-btn:hover:not(:disabled) {
+    background: rgba(139,105,20,0.1);
+    border-color: var(--gold);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(139,105,20,0.2);
+  }
+  .option-btn.correct {
+    background: rgba(74,94,58,0.18);
+    border-color: var(--sage);
+    color: var(--sage);
+    font-weight: 600;
+  }
+  .option-btn.correct::after { content: ' ✓'; }
+  .option-btn.wrong {
+    background: rgba(139,26,26,0.1);
+    border-color: var(--crimson);
+    color: var(--crimson);
+    text-decoration: line-through;
+  }
+  .option-btn.wrong::after { content: ' ✗'; }
+  .option-btn:disabled { cursor: default; transform: none; }
+
+  .feedback-box {
+    background: rgba(255,255,255,0.4);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--ink-lt);
+    line-height: 1.6;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .feedback-box.visible { display: block; }
+
+  .quiz-nav { display: flex; justify-content: space-between; align-items: center; }
+
+  /* ── RESULTS SCREEN ── */
+  #screen-results { display: none; }
+
+  .results-header { text-align: center; margin-bottom: 24px; }
+  .results-icon { font-size: 3rem; margin-bottom: 12px; }
+  .results-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.1rem, 4vw, 1.6rem);
+    color: var(--crimson);
+    margin-bottom: 8px;
+  }
+  .results-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--ink-lt);
+    letter-spacing: 0.08em;
+  }
+
+  .score-display {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(139,105,20,0.12), rgba(139,105,20,0.04));
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+  .score-big {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 3.5rem;
+    color: var(--crimson);
+    line-height: 1;
+  }
+  .score-denom {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+  .score-pct {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--ink-lt);
+    margin-top: 8px;
+  }
+
+  .pass-banner {
+    text-align: center;
+    padding: 12px 20px;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .pass-banner.passed {
+    background: rgba(74,94,58,0.15);
+    border: 1px solid var(--sage);
+    color: var(--sage);
+  }
+  .pass-banner.failed {
+    background: rgba(139,26,26,0.1);
+    border: 1px solid var(--crimson);
+    color: var(--crimson);
+  }
+
+  .certificate-note {
+    background: rgba(184,134,11,0.08);
+    border: 1px dashed var(--gold);
+    border-radius: 3px;
+    padding: 16px 20px;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--ink-lt);
+    margin-bottom: 24px;
+    font-style: italic;
+    text-align: center;
+  }
+
+  .results-actions {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .results-actions .btn { flex: 1; min-width: 140px; }
+
+  /* ── WELCOME BANNER ── */
+  .welcome-back {
+    background: rgba(74,94,58,0.12);
+    border: 1px solid rgba(74,94,58,0.4);
+    border-radius: 3px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--sage);
+    margin-bottom: 18px;
+    text-align: center;
+    display: none;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeDown { from { opacity:0; transform: translateY(-16px); } to { opacity:1; transform: none; } }
+  @keyframes fadeUp   { from { opacity:0; transform: translateY(16px);  } to { opacity:1; transform: none; } }
+  @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+
+  .screen { animation: fadeIn 0.4s ease both; }
+
+  /* ── FOOTER ── */
+  .site-footer {
+    margin-top: 28px;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    color: rgba(244,234,213,0.35);
+    text-transform: uppercase;
+  }
+
+  /* ── ERROR ── */
+  .error-msg {
+    color: var(--crimson);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 6px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="seal-ring">⚔️</div>
+  <h1>Henry County, Virginia<br>250th Anniversary</h1>
+  <div class="subtitle">Colonel George Waller Chapter · Sons of the American Revolution</div>
+</header>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div class="card" id="screen-login">
+  <p class="login-title">Begin Your Journey</p>
+  <p class="login-intro">Test your knowledge of Henry County's founding and its role in the American Revolution. Complete all lessons and score 75% or higher to earn your certificate.</p>
+
+  <div class="divider"><span>Register or Return</span></div>
+
+  <div id="welcome-back-msg" class="welcome-back"></div>
+
+  <div class="field-group">
+    <label for="input-name">Your Full Name</label>
+    <input type="text" id="input-name" placeholder="e.g. Thomas Jefferson" autocomplete="off">
+  </div>
+  <div class="field-group">
+    <label for="input-pin">4-Digit PIN</label>
+    <input type="password" id="input-pin" placeholder="••••" maxlength="4" inputmode="numeric">
+    <p class="field-hint">First time? Choose any 4 digits to remember. Returning? Enter your same PIN to resume.</p>
+  </div>
+  <p class="error-msg" id="login-error">Please enter your name and a 4-digit PIN.</p>
+
+  <div style="margin-top:8px;">
+    <button class="btn btn-primary" onclick="handleLogin()">Enter the Course →</button>
+  </div>
+</div>
+
+<!-- ══════════════ LESSON SCREEN ══════════════ -->
+<div class="card screen" id="screen-lesson">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="lesson-progress-bar" style="width:0%"></div>
+  </div>
+  <div class="progress-label" id="lesson-progress-label">Lesson 1 of 5</div>
+
+  <div class="lesson-chapter" id="lesson-chapter"></div>
+  <div class="lesson-title" id="lesson-title"></div>
+  <div class="lesson-body" id="lesson-body"></div>
+
+  <div class="divider"><span>Ready to Continue?</span></div>
+
+  <div class="lesson-nav">
+    <button class="btn btn-secondary" id="btn-lesson-back" onclick="prevLesson()">← Back</button>
+    <button class="btn btn-nav" id="btn-lesson-next" onclick="nextLesson()">Next →</button>
+  </div>
+</div>
+
+<!-- ══════════════ QUIZ SCREEN ══════════════ -->
+<div class="card screen" id="screen-quiz">
+  <div class="quiz-meta">
+    <div class="quiz-counter" id="quiz-counter">Question 1 of 10</div>
+    <div class="quiz-score-live" id="quiz-score-live">Score: 0</div>
+  </div>
+
+  <div class="question-text" id="question-text"></div>
+
+  <div class="options-grid" id="options-grid"></div>
+
+  <div class="feedback-box" id="feedback-box"></div>
+
+  <div class="quiz-nav">
+    <button class="btn btn-secondary" id="btn-prev-q" onclick="prevQuestion()" style="visibility:hidden;">← Back</button>
+    <button class="btn btn-nav" id="btn-next-q" onclick="nextQuestion()" disabled>Next Question →</button>
+  </div>
+</div>
+
+<!-- ══════════════ RESULTS SCREEN ══════════════ -->
+<div class="card screen" id="screen-results">
+  <div class="results-header">
+    <div class="results-icon" id="results-icon">🏆</div>
+    <div class="results-title" id="results-title">Well Done!</div>
+    <div class="results-name" id="results-name"></div>
+  </div>
+
+  <div class="score-display">
+    <div class="score-big" id="score-big">0</div>
+    <div class="score-denom" id="score-denom">out of 10 correct</div>
+    <div class="score-pct" id="score-pct">0%</div>
+  </div>
+
+  <div class="pass-banner" id="pass-banner"></div>
+
+  <div class="certificate-note" id="cert-note"></div>
+
+  <div class="divider"><span>What's Next?</span></div>
+
+  <div class="results-actions">
+    <button class="btn btn-nav" onclick="retakeQuiz()">Retake Quiz</button>
+    <button class="btn btn-primary" onclick="goHome()">Return to Lessons</button>
+  </div>
+</div>
+
+<footer class="site-footer">Henry County, Virginia · Est. 1777 · 250th Anniversary · 2027</footer>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+
+const PASS_SCORE = 0.75;
+
+const lessons = [
+  {
+    chapter: "Lesson 1 of 3",
+    title: "The Formation of Henry County",
+    body: `<p>Henry County's story began long before any courthouse or county line existed. The land that would become Henry County was first carved from <strong>Pittsylvania County</strong> by an act of the Virginia General Assembly passed in <strong>October 1776</strong>. Because the legislation specified the county would not legally exist until the last day of December, Henry County officially came into being on <strong>January 1, 1777</strong> — the same year the new United States was fighting for its life.</p>
+
+<p>The county was named in honor of <strong>Patrick Henry</strong>, who was then serving as Virginia's first governor following independence. Henry himself had supported the creation of the county, and some of his relatives had already settled in the area. He would later live at his <strong>Leatherwood Plantation</strong> in the county from 1779 to 1784, growing tobacco and maintaining close ties to the frontier he helped govern.</p>
+
+<p>The first county court convened on the <strong>third Monday of January 1777</strong>, meeting at the home of John Rowland along the Smith River. Five justices — appointed for life — took an Oath of Allegiance to Virginia and began organizing the new county's government. <strong>Robert Hairston</strong> was commissioned as the first High Sheriff, with two of his sons serving as Under Sheriffs. The original county seat was established in what is today the Stanleytown area, roughly a mile northeast of where Stanley Furniture would later be built.</p>
+
+<p>The county's boundaries shifted considerably in its early decades. Originally, Henry County included the territory that would later become <strong>Franklin County</strong> (split off in 1785–1787) and <strong>Patrick County</strong> (split off in 1791). The landscape — rolling hills, hardwood forests, and the <strong>Smith River</strong> cutting through the Piedmont — drew settlers steadily westward from the older Virginia counties. A county seat was required by law to sit at the center of the county and no more than a day's ride by horse from any part of it, a rule that governed where early government buildings were placed.</p>`
+  },
+  {
+    chapter: "Lesson 2 of 3",
+    title: "Being a Patriot of Henry County",
+    body: `<p>In the newly formed Henry County of 1777, being a "patriot" was not a vague sentiment — it was a formal, documented commitment. Every free male citizen was required to take an <strong>Oath of Allegiance</strong> to the Commonwealth of Virginia, renouncing loyalty to King George III. Records show that approximately <strong>630 citizens took the oath</strong> in Henry County, while around 40 refused, remaining loyal to the Crown. Those who refused were known as <strong>Tories</strong> (or Loyalists), and the conflict between Patriots and Tories made the Revolutionary War deeply personal — neighbor against neighbor on the Virginia frontier.</p>
+
+<p>The county's earliest government was built on the <strong>Justice of the Peace</strong> system. The five original justices — Edward Lyne, Abram Penn, Peter Saunders, <strong>George Waller</strong>, and Robert Hairston — held broad authority over local affairs. They functioned much as a combined board of supervisors, judge, and administrator would today, handling everything from land disputes to road construction to the appointment of county officers. The court also managed the appointment of <strong>constables</strong> to maintain order in the county
+
+const allQuestions = [
+  {
+    q: "In what year was Henry County formally established by the Virginia General Assembly?",
+    options: ["1774","1776","1777","1781"],
+    answer: 1,
+    feedback: "Henry County was created by act of the Virginia General Assembly on October 7, 1776, and formally organized in 1777."
+  },
+  {
+    q: "Henry County was carved from which neighboring county?",
+    options: ["Halifax County","Bedford County","Pittsylvania County","Botetourt County"],
+    answer: 2,
+    feedback: "Henry County was formed from the western portion of Pittsylvania County."
+  },
+  {
+    q: "For whom was Martinsville named?",
+    options: ["General Joseph Martin","Governor Thomas Martin","Reverend John Martin","Colonel Samuel Martin"],
+    answer: 0,
+    feedback: "Martinsville was named after General Joseph Martin, a frontier soldier and Indian agent."
+  },
+  {
+    q: "Patrick Henry's famous 'Give me liberty, or give me death!' speech was delivered at which event?",
+    options: ["The First Continental Congress","The Constitutional Convention","The Second Virginia Convention","The Virginia House of Burgesses"],
+    answer: 2,
+    feedback: "Patrick Henry delivered this famous speech at the Second Virginia Convention in Richmond, March 1775."
+  },
+  {
+    q: "Patrick Henry served as which number governor of Virginia?",
+    options: ["First and Third","First and Sixth","Second and Fifth","Third and Seventh"],
+    answer: 1,
+    feedback: "Patrick Henry served as Virginia's first governor (1776–1779) and later as its sixth governor (1784–1786)."
+  },
+  {
+    q: "The Battle of Guilford Court House was fought in what year?",
+    options: ["1778","1779","1780","1781"],
+    answer: 3,
+    feedback: "The Battle of Guilford Court House was fought on March 15, 1781, in present-day Greensboro, North Carolina."
+  },
+  {
+    q: "Although Britain won the Battle of Guilford Court House tactically, what was its strategic consequence?",
+    options: [
+      "It secured the Carolinas for Britain permanently",
+      "It weakened Cornwallis and helped lead to Yorktown",
+      "It ended the Southern Campaign",
+      "It caused France to withdraw support"
+    ],
+    answer: 1,
+    feedback: "The battle so depleted Cornwallis's forces that he retreated northward, ultimately leading to the surrender at Yorktown."
+  },
+  {
+    q: "What is the Sons of the American Revolution (SAR)?",
+    options: [
+      "A military branch of the U.S. Army",
+      "A lineage society for descendants of Revolutionary War patriots",
+      "A Virginia state historical commission",
+      "A fraternal order founded during the Civil War"
+    ],
+    answer: 1,
+    feedback: "The SAR is a lineage society whose members are documented descendants of patriots who supported American independence."
+  },
+  {
+    q: "In what year was the Sons of the American Revolution founded nationally?",
+    options: ["1776","1812","1865","1889"],
+    answer: 3,
+    feedback: "The SAR was founded in 1889 to preserve the memory and legacy of Revolutionary War patriots."
+  },
+  {
+    q: "What years define the period of recognized Revolutionary War patriot service for SAR membership?",
+    options: ["1770–1780","1774–1782","1775–1783","1776–1784"],
+    answer: 2,
+    feedback: "SAR membership requires documented lineage to a patriot who supported independence between 1775 and 1783."
+  },
+  {
+    q: "Which county seat serves Henry County, Virginia?",
+    options: ["Bassett","Collinsville","Fieldale","Martinsville"],
+    answer: 3,
+    feedback: "Martinsville is the county seat and independent city adjacent to Henry County."
+  },
+  {
+    q: "Bassett Furniture was founded in what year?",
+    options: ["1888","1902","1915","1923"],
+    answer: 1,
+    feedback: "Bassett Furniture Industries was founded in 1902 by J.D. Bassett Sr. in Bassett, Virginia."
+  },
+  {
+    q: "Martinsville was historically nicknamed the capital of what industry?",
+    options: ["Tobacco","Furniture","Sweatshirts","Textiles"],
+    answer: 2,
+    feedback: "Martinsville was known as the 'Sweatshirt Capital of the World' due to its thriving textile industry."
+  },
+  {
+    q: "What major sporting venue is located in Martinsville, Virginia?",
+    options: ["Martinsville Speedway","Virginia International Raceway","Richmond Raceway","Motor Mile Speedway"],
+    answer: 0,
+    feedback: "Martinsville Speedway is one of the oldest and shortest tracks on the NASCAR Cup Series circuit."
+  },
+  {
+    q: "The indigenous people historically associated with the Henry County region are known as:",
+    options: ["Cherokee","Monacan","Saura (Cheraw)","Tuscarora"],
+    answer: 2,
+    feedback: "The Saura, also known as the Cheraw people, historically inhabited the region before European settlement."
+  },
+  {
+    q: "Patrick Henry is most associated with advocating for which addition to the U.S. Constitution?",
+    options: ["The Commerce Clause","The Bill of Rights","The Electoral College","The Three-Fifths Compromise"],
+    answer: 1,
+    feedback: "Henry refused to sign the Constitution without guaranteed individual rights protections, helping push for the Bill of Rights."
+  },
+  {
+    q: "The 250th anniversary of Henry County falls in what year?",
+    options: ["2025","2026","2027","2028"],
+    answer: 2,
+    feedback: "Henry County was formally organized in 1777, making 2027 the 250th anniversary year."
+  },
+  {
+    q: "Under which American general did many Henry County militiamen serve during the Southern Campaign?",
+    options: ["George Washington","Nathanael Greene","Anthony Wayne","Horatio Gates"],
+    answer: 1,
+    feedback: "General Nathanael Greene commanded the Continental Army in the Southern Campaign, working closely with local militias."
+  },
+  {
+    q: "General Joseph Martin was best known on the Virginia frontier for:",
+    options: [
+      "Commanding at Yorktown",
+      "Negotiating treaties with the Cherokee and protecting the frontier",
+      "Founding the Virginia militia",
+      "Drafting the Virginia Declaration of Rights"
+    ],
+    answer: 1,
+    feedback: "Martin served as an Indian agent and frontier soldier, negotiating with the Cherokee and defending Virginia's western settlements."
+  },
+  {
+    q: "Henry County is located in which region of Virginia?",
+    options: ["Tidewater","Northern Virginia","Shenandoah Valley","Southside Piedmont"],
+    answer: 3,
+    feedback: "Henry County is located in the Southside Piedmont region of Virginia, near the North Carolina border."
+  }
+];
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let state = {
+  name: '',
+  currentLesson: 0,
+  quizQuestions: [],
+  currentQ: 0,
+  score: 0,
+  answered: false
+};
+
+// Simple localStorage helpers (demo - real version uses Firebase)
+function saveState() {
+  try { localStorage.setItem('hc250_state', JSON.stringify(state)); } catch(e) {}
+}
+function loadState(name) {
+  try {
+    const s = JSON.parse(localStorage.getItem('hc250_state') || 'null');
+    if (s && s.name && s.name.toLowerCase() === name.toLowerCase()) return s;
+  } catch(e) {}
+  return null;
+}
+
+// ═══════════════════════════════════════════════
+//  SCREENS
+// ═══════════════════════════════════════════════
+function showScreen(id) {
+  ['screen-login','screen-lesson','screen-quiz','screen-results'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
+  });
+  document.getElementById(id).style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════
+function handleLogin() {
+  const name = document.getElementById('input-name').value.trim();
+  const pin  = document.getElementById('input-pin').value.trim();
+  const err  = document.getElementById('login-error');
+
+  if (!name || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+    err.style.display = 'block';
+    err.textContent = 'Please enter your full name and a 4-digit numeric PIN.';
+    return;
+  }
+  err.style.display = 'none';
+
+  const saved = loadState(name);
+  state = saved ? { ...saved } : {
+    name, pin, currentLesson: 0,
+    quizQuestions: [], currentQ: 0, score: 0, answered: false
+  };
+  state.name = name;
+
+  showScreen('screen-lesson');
+  renderLesson();
+}
+
+// ═══════════════════════════════════════════════
+//  LESSONS
+// ═══════════════════════════════════════════════
+function renderLesson() {
+  const l = lessons[state.currentLesson];
+  const pct = ((state.currentLesson) / lessons.length) * 100;
+
+  document.getElementById('lesson-progress-bar').style.width = pct + '%';
+  document.getElementById('lesson-progress-label').textContent =
+    `Lesson ${state.currentLesson + 1} of ${lessons.length}`;
+  document.getElementById('lesson-chapter').textContent = l.chapter;
+  document.getElementById('lesson-title').textContent   = l.title;
+  document.getElementById('lesson-body').innerHTML      = l.body;
+  document.getElementById('btn-lesson-back').style.visibility =
+    state.currentLesson === 0 ? 'hidden' : 'visible';
+
+  const nextBtn = document.getElementById('btn-lesson-next');
+  if (state.currentLesson === lessons.length - 1) {
+    nextBtn.textContent = 'Proceed to Quiz →';
+  } else {
+    nextBtn.textContent = 'Next Lesson →';
+  }
+  saveState();
+}
+
+function nextLesson() {
+  if (state.currentLesson < lessons.length - 1) {
+    state.currentLesson++;
+    renderLesson();
+  } else {
+    startQuiz();
+  }
+}
+
+function prevLesson() {
+  if (state.currentLesson > 0) {
+    state.currentLesson--;
+    renderLesson();
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  state.quizQuestions = shuffle(allQuestions).slice(0, 10);
+  state.currentQ = 0;
+  state.score    = 0;
+  state.answered = false;
+  state.answers  = {};   // track { qIndex: chosenIdx } so back works
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q   = state.quizQuestions[state.currentQ];
+  const num = state.currentQ + 1;
+  const tot = state.quizQuestions.length;
+
+  document.getElementById('quiz-counter').textContent    = `Question ${num} of ${tot}`;
+  document.getElementById('quiz-score-live').textContent = `Score: ${state.score}`;
+  document.getElementById('question-text').textContent   = q.q;
+  document.getElementById('feedback-box').classList.remove('visible');
+
+  const isLast = state.currentQ === tot - 1;
+  document.getElementById('btn-next-q').textContent = isLast ? 'See Results →' : 'Next Question →';
+
+  // Show/hide back button
+  document.getElementById('btn-prev-q').style.visibility =
+    state.currentQ === 0 ? 'hidden' : 'visible';
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+
+  const alreadyAnswered = state.answers && state.answers[state.currentQ] !== undefined;
+  state.answered = alreadyAnswered;
+  document.getElementById('btn-next-q').disabled = !alreadyAnswered;
+
+  // Shuffle option display order (but keep stable if already answered)
+  const indices = alreadyAnswered
+    ? (state.answerOrder[state.currentQ] || shuffle([0,1,2,3]))
+    : shuffle([0,1,2,3]);
+
+  if (!alreadyAnswered) {
+    if (!state.answerOrder) state.answerOrder = {};
+    state.answerOrder[state.currentQ] = indices;
+  }
+
+  indices.forEach(i => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = q.options[i];
+
+    if (alreadyAnswered) {
+      btn.disabled = true;
+      const chosen = state.answers[state.currentQ];
+      if (i === q.answer) btn.classList.add('correct');
+      else if (i === chosen && chosen !== q.answer) btn.classList.add('wrong');
+    } else {
+      btn.onclick = () => selectAnswer(i, btn, q);
+    }
+    grid.appendChild(btn);
+  });
+
+  if (alreadyAnswered) {
+    const fb = document.getElementById('feedback-box');
+    fb.textContent = q.feedback;
+    fb.classList.add('visible');
+  }
+}
+
+function selectAnswer(chosenIdx, btn, q) {
+  if (state.answered) return;
+  state.answered = true;
+
+  // Record this answer
+  if (!state.answers) state.answers = {};
+  state.answers[state.currentQ] = chosenIdx;
+
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => { b.disabled = true; });
+
+  if (chosenIdx === q.answer) {
+    btn.classList.add('correct');
+    state.score++;
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b => {
+      if (b.textContent.replace(' ✓','').replace(' ✗','') === q.options[q.answer]) {
+        b.classList.add('correct');
+      }
+    });
+  }
+
+  const fb = document.getElementById('feedback-box');
+  fb.textContent = q.feedback;
+  fb.classList.add('visible');
+  document.getElementById('btn-next-q').disabled = false;
+  document.getElementById('quiz-score-live').textContent = `Score: ${state.score}`;
+  saveState();
+}
+
+function prevQuestion() {
+  if (state.currentQ > 0) {
+    state.currentQ--;
+    renderQuestion();
+  }
+}
+
+function nextQuestion() {
+  if (state.currentQ < state.quizQuestions.length - 1) {
+    state.currentQ++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════════════
+function showResults() {
+  const total = state.quizQuestions.length;
+  const pct   = state.score / total;
+  const passed = pct >= PASS_SCORE;
+
+  document.getElementById('results-icon').textContent  = passed ? '🏆' : '📜';
+  document.getElementById('results-title').textContent = passed ? 'Congratulations!' : 'Keep Studying!';
+  document.getElementById('results-name').textContent  = state.name;
+  document.getElementById('score-big').textContent     = state.score;
+  document.getElementById('score-denom').textContent   = `out of ${total} correct`;
+  document.getElementById('score-pct').textContent     = `${Math.round(pct * 100)}% — ${passed ? 'Passing Score' : 'Below Passing'}`;
+
+  const banner = document.getElementById('pass-banner');
+  if (passed) {
+    banner.className = 'pass-banner passed';
+    banner.textContent = '✦ You have earned your certificate ✦';
+  } else {
+    banner.className = 'pass-banner failed';
+    banner.textContent = `A score of ${Math.round(PASS_SCORE*100)}% is required to pass. You scored ${Math.round(pct*100)}%.`;
+  }
+
+  const certNote = document.getElementById('cert-note');
+  if (passed) {
+    certNote.innerHTML = `Your completion has been recorded. Please present your name — <strong>${state.name}</strong> — to a member of the <em>Colonel George Waller Chapter, SAR</em> to receive your official printed certificate.`;
+  } else {
+    certNote.innerHTML = `Don't be discouraged! Review the lesson materials and try again. The questions rotate each attempt, giving you a fresh challenge every time.`;
+  }
+
+  showScreen('screen-results');
+}
+
+function retakeQuiz() {
+  state.currentLesson = 0;
+  startQuiz();
+}
+
+function goHome() {
+  state.currentLesson = 0;
+  showScreen('screen-lesson');
+  renderLesson();
+}
+</script>
+</body>
+</html>

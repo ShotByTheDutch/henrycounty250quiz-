@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¡Aprende Español! — Spanish Learning Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sun: #FFD93D;
+    --coral: #FF6B6B;
+    --mint: #6BCB77;
+    --sky: #4D96FF;
+    --lavender: #C77DFF;
+    --sand: #FFF3E0;
+    --dark: #1a1a2e;
+    --card: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .stars {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; overflow: hidden; z-index: 0;
+  }
+  .star {
+    position: absolute; background: white; border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+    opacity: 0.3;
+  }
+  @keyframes twinkle { from { opacity: 0.1; } to { opacity: 0.5; } }
+
+  .app {
+    position: relative; z-index: 1;
+    max-width: 800px; margin: 0 auto;
+  }
+
+  header {
+    text-align: center; padding: 30px 20px 20px;
+    animation: slideDown 0.6s ease;
+  }
+  @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    color: white;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+    letter-spacing: 2px;
+  }
+  header p {
+    color: rgba(255,255,255,0.85);
+    font-size: 1.1rem;
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px; height: 12px;
+    margin: 15px 0;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; background: var(--sun);
+    border-radius: 20px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 8px rgba(255,217,61,0.7);
+  }
+
+  /* Tab nav */
+  .tabs {
+    display: flex; gap: 8px; margin: 20px 0;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .tab-btn {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.4);
+    color: white; padding: 10px 18px;
+    border-radius: 30px; cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.95rem;
+    transition: all 0.25s;
+  }
+  .tab-btn:hover { background: rgba(255,255,255,0.35); transform: translateY(-2px); }
+  .tab-btn.active {
+    background: white; color: #764ba2;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  /* Cards */
+  .card {
+    background: white; border-radius: 24px;
+    padding: 28px; margin: 12px 0;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .card h2 {
+    font-family: 'Fredoka One', cursive;
+    color: #764ba2; font-size: 1.6rem;
+    margin-bottom: 6px;
+  }
+  .card .subtitle {
+    color: #888; font-size: 0.95rem; margin-bottom: 20px; font-weight: 600;
+  }
+
+  /* Lesson content */
+  .lesson-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px; margin: 15px 0;
+  }
+  .vocab-tile {
+    background: linear-gradient(135deg, #f8f9ff, #eef0ff);
+    border: 2px solid #e0e4ff;
+    border-radius: 16px; padding: 14px 10px;
+    text-align: center; cursor: pointer;
+    transition: all 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .vocab-tile:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: #764ba2;
+    box-shadow: 0 6px 20px rgba(118,75,162,0.15);
+  }
+  .vocab-tile .emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .vocab-tile .spanish {
+    font-family: 'Fredoka One', cursive;
+    color: #764ba2; font-size: 1.05rem;
+  }
+  .vocab-tile .english {
+    color: #999; font-size: 0.8rem; margin-top: 3px; font-weight: 600;
+  }
+  .vocab-tile .audio-hint {
+    font-size: 0.75rem; color: #bbb; margin-top: 4px;
+  }
+
+  /* Season cards */
+  .season-card {
+    border-radius: 20px; padding: 20px;
+    margin: 8px 0; display: flex; align-items: center; gap: 16px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .season-card:hover { transform: scale(1.01); }
+  .season-card.primavera { background: linear-gradient(135deg, #d4fc79, #96e6a1); }
+  .season-card.verano    { background: linear-gradient(135deg, #ffeaa7, #fdcb6e); }
+  .season-card.otono     { background: linear-gradient(135deg, #fd9a6b, #e17055); }
+  .season-card.invierno  { background: linear-gradient(135deg, #a8edea, #74b9ff); }
+  .season-card .big-emoji { font-size: 3rem; }
+  .season-card-text h3 { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: rgba(0,0,0,0.75); }
+  .season-card-text p { color: rgba(0,0,0,0.6); font-weight: 600; font-size: 0.9rem; }
+
+  .months-in-season {
+    display: none; margin-top: 10px;
+    background: rgba(255,255,255,0.5); border-radius: 12px;
+    padding: 10px 14px; font-weight: 700; color: rgba(0,0,0,0.65);
+    font-size: 0.9rem;
+  }
+  .season-card.open .months-in-season { display: block; }
+
+  /* Comparatives lesson */
+  .compare-table {
+    width: 100%; border-collapse: collapse; margin: 15px 0;
+  }
+  .compare-table th {
+    background: #764ba2; color: white;
+    padding: 12px; text-align: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+  }
+  .compare-table th:first-child { border-radius: 12px 0 0 0; }
+  .compare-table th:last-child  { border-radius: 0 12px 0 0; }
+  .compare-table td {
+    padding: 11px 14px; text-align: center;
+    border-bottom: 1px solid #f0e8ff;
+    font-weight: 700; color: #444;
+  }
+  .compare-table tr:last-child td:first-child { border-radius: 0 0 0 12px; }
+  .compare-table tr:last-child td:last-child  { border-radius: 0 0 12px 0; }
+  .compare-table tr:nth-child(even) td { background: #faf7ff; }
+  .compare-table .formula { color: #764ba2; font-family: 'Fredoka One', cursive; font-size: 1.1rem; }
+  .compare-table .example { color: #555; font-size: 0.85rem; font-weight: 600; }
+
+  .formula-box {
+    background: linear-gradient(135deg, #ffeef8, #eef0ff);
+    border: 2px dashed #c77dff;
+    border-radius: 16px; padding: 16px 20px; margin: 12px 0;
+    text-align: center;
+  }
+  .formula-box .label { color: #888; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .formula-box .formula { color: #764ba2; font-family: 'Fredoka One', cursive; font-size: 1.3rem; margin: 4px 0; }
+  .formula-box .ex { color: #555; font-size: 0.9rem; font-weight: 600; }
+
+  /* Quiz section */
+  .quiz-wrap { }
+  .quiz-question {
+    font-size: 1.15rem; font-weight: 800; color: #333;
+    margin-bottom: 6px; line-height: 1.4;
+  }
+  .quiz-context {
+    font-size: 0.9rem; color: #888; margin-bottom: 18px; font-weight: 600;
+  }
+  .quiz-options {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 20px;
+  }
+  .opt-btn {
+    padding: 14px 12px; border-radius: 14px;
+    border: 2px solid #e0e4ff; background: #f8f9ff;
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 1rem; color: #444;
+    transition: all 0.2s; text-align: center;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: #764ba2; background: #f0ebff;
+    transform: translateY(-2px);
+  }
+  .opt-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+  .opt-btn.wrong   { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+  .opt-btn:disabled { cursor: default; }
+
+  .feedback-box {
+    border-radius: 14px; padding: 14px 18px;
+    margin: 10px 0; font-weight: 700; font-size: 0.95rem;
+    display: none;
+  }
+  .feedback-box.show { display: block; animation: pop 0.3s ease; }
+  @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .feedback-box.correct { background: #d4edda; color: #155724; }
+  .feedback-box.wrong   { background: #fff3cd; color: #856404; }
+
+  .quiz-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 15px;
+  }
+  .q-counter { color: #888; font-weight: 700; font-size: 0.9rem; }
+
+  /* Buttons */
+  .btn {
+    padding: 12px 28px; border-radius: 30px; border: none;
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    color: white; box-shadow: 0 4px 15px rgba(118,75,162,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(118,75,162,0.45); }
+  .btn-secondary { background: #f0ebff; color: #764ba2; }
+  .btn-secondary:hover { background: #e0d5ff; }
+
+  /* Score screen */
+  .score-screen { text-align: center; padding: 20px; }
+  .score-screen .big-score {
+    font-family: 'Fredoka One', cursive;
+    font-size: 5rem; color: #764ba2;
+    text-shadow: 3px 3px 0 rgba(118,75,162,0.15);
+  }
+  .score-screen p { color: #555; font-size: 1.1rem; font-weight: 700; margin: 10px 0; }
+  .score-badge {
+    font-size: 4rem; margin: 15px 0; display: block;
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed; width: 10px; height: 10px;
+    border-radius: 2px; pointer-events: none; z-index: 9999;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  .hidden { display: none !important; }
+
+  /* Tooltips / pronunciation */
+  .pronun {
+    display: inline-block;
+    background: #f0ebff; border-radius: 8px;
+    padding: 2px 8px; font-size: 0.8rem;
+    color: #764ba2; font-weight: 700; margin-left: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .tip-box {
+    background: linear-gradient(135deg, #fff9c4, #fff3b0);
+    border-left: 4px solid var(--sun);
+    border-radius: 0 12px 12px 0;
+    padding: 12px 16px; margin: 12px 0;
+    font-size: 0.92rem; color: #555; font-weight: 600;
+  }
+  .tip-box strong { color: #333; }
+
+  @media (max-width: 500px) {
+    .quiz-options { grid-template-columns: 1fr; }
+    .lesson-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="app">
+  <header>
+    <h1>¡Aprende Español! 🌟</h1>
+    <p>Seasons • Months • Comparatives — Learn & Quiz</p>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('seasons')">🌸 Seasons</button>
+    <button class="tab-btn" onclick="showTab('months')">📅 Months</button>
+    <button class="tab-btn" onclick="showTab('comparatives')">📊 Comparatives</button>
+    <button class="tab-btn" onclick="showTab('quiz')">🎯 Quiz!</button>
+  </div>
+
+  <!-- SEASONS TAB -->
+  <div id="tab-seasons" class="tab-content">
+    <div class="card">
+      <h2>🌍 Las Estaciones del Año</h2>
+      <div class="subtitle">The Seasons of the Year — tap each to see which months belong!</div>
+      <div class="tip-box">
+        💡 <strong>Key tip:</strong> In Spanish, seasons are usually written in lowercase and are masculine. We say <em>el verano</em> (the summer), <em>la primavera</em> (the spring).
+      </div>
+
+      <div class="season-card primavera" onclick="toggleSeason(this)">
+        <div class="big-emoji">🌸</div>
+        <div class="season-card-text">
+          <h3>la primavera <span class="pronun">pree-mah-VEH-rah</span></h3>
+          <p>Spring — when flowers bloom!</p>
+          <div class="months-in-season">📅 marzo, abril, mayo (March, April, May)</div>
+        </div>
+      </div>
+
+      <div class="season-card verano" onclick="toggleSeason(this)">
+        <div class="big-emoji">☀️</div>
+        <div class="season-card-text">
+          <h3>el verano <span class="pronun">veh-RAH-noh</span></h3>
+          <p>Summer — hot and sunny!</p>
+          <div class="months-in-season">📅 junio, julio, agosto (June, July, August)</div>
+        </div>
+      </div>
+
+      <div class="season-card otono" onclick="toggleSeason(this)">
+        <div class="big-emoji">🍂</div>
+        <div class="season-card-text">
+          <h3>el otoño <span class="pronun">oh-TOH-nyoh</span></h3>
+          <p>Autumn/Fall — leaves change!</p>
+          <div class="months-in-season">📅 septiembre, octubre, noviembre (September, October, November)</div>
+        </div>
+      </div>
+
+      <div class="season-card invierno" onclick="toggleSeason(this)">
+        <div class="big-emoji">❄️</div>
+        <div class="season-card-text">
+          <h3>el invierno <span class="pronun">een-vee-EHR-noh</span></h3>
+          <p>Winter — cold and cozy!</p>
+          <div class="months-in-season">📅 diciembre, enero, febrero (December, January, February)</div>
+        </div>
+      </div>
+
+      <div class="tip-box" style="margin-top:16px">
+        💡 <strong>Grammar tip:</strong> When you say "It is spring," Spanish says <em>"Es la primavera"</em> or just <em>"Es primavera."</em> Both are used!
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTHS TAB -->
+  <div id="tab-months" class="tab-content hidden">
+    <div class="card">
+      <h2>📅 Los Meses del Año</h2>
+      <div class="subtitle">The 12 Months — notice how similar many are to English!</div>
+      <div class="tip-box">
+        💡 <strong>Key tip:</strong> Months in Spanish are <em>NOT</em> capitalized (unlike English). <em>enero</em>, not <em>Enero</em>.
+      </div>
+      <div class="lesson-grid">
+        <div class="vocab-tile"><span class="emoji">❄️</span><div class="spanish">enero</div><div class="english">January</div><div class="audio-hint">eh-NEH-roh</div></div>
+        <div class="vocab-tile"><span class="emoji">💝</span><div class="spanish">febrero</div><div class="english">February</div><div class="audio-hint">feh-BREH-roh</div></div>
+        <div class="vocab-tile"><span class="emoji">🌧️</span><div class="spanish">marzo</div><div class="english">March</div><div class="audio-hint">MAR-soh</div></div>
+        <div class="vocab-tile"><span class="emoji">🌷</span><div class="spanish">abril</div><div class="english">April</div><div class="audio-hint">ah-BREEL</div></div>
+        <div class="vocab-tile"><span class="emoji">🌺</span><div class="spanish">mayo</div><div class="english">May</div><div class="audio-hint">MY-oh</div></div>
+        <div class="vocab-tile"><span class="emoji">🌞</span><div class="spanish">junio</div><div class="english">June</div><div class="audio-hint">HOON-yoh</div></div>
+        <div class="vocab-tile"><span class="emoji">🏖️</span><div class="spanish">julio</div><div class="english">July</div><div class="audio-hint">HOOL-yoh</div></div>
+        <div class="vocab-tile"><span class="emoji">🌻</span><div class="spanish">agosto</div><div class="english">August</div><div class="audio-hint">ah-GOSS-toh</div></div>
+        <div class="vocab-tile"><span class="emoji">🍂</span><div class="spanish">septiembre</div><div class="english">September</div><div class="audio-hint">sep-tee-EM-breh</div></div>
+        <div class="vocab-tile"><span class="emoji">🎃</span><div class="spanish">octubre</div><div class="english">October</div><div class="audio-hint">ok-TOO-breh</div></div>
+        <div class="vocab-tile"><span class="emoji">🦃</span><div class="spanish">noviembre</div><div class="english">November</div><div class="audio-hint">noh-vee-EM-breh</div></div>
+        <div class="vocab-tile"><span class="emoji">🎄</span><div class="spanish">diciembre</div><div class="english">December</div><div class="audio-hint">dee-see-EM-breh</div></div>
+      </div>
+      <div class="tip-box">
+        💡 <strong>Trick to remember:</strong> Many months look just like English — <em>enero → January</em>, <em>octubre → October</em>, <em>diciembre → December</em>. Spot the pattern!
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARATIVES TAB -->
+  <div id="tab-comparatives" class="tab-content hidden">
+    <div class="card">
+      <h2>📊 Comparatives & Superlatives</h2>
+      <div class="subtitle">How to say "more," "less," "most," and "least" in Spanish</div>
+
+      <div class="tip-box">
+        💡 In English we say <strong>"taller"</strong> or <strong>"more tall."</strong> In Spanish, you always use a formula instead of changing the word ending!
+      </div>
+
+      <table class="compare-table">
+        <thead>
+          <tr><th>Type</th><th>Formula</th><th>Example</th><th>Means</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Comparative (+)</strong></td>
+            <td class="formula">más + adj + que</td>
+            <td class="example">más alto que</td>
+            <td>taller than</td>
+          </tr>
+          <tr>
+            <td><strong>Comparative (−)</strong></td>
+            <td class="formula">menos + adj + que</td>
+            <td class="example">menos frío que</td>
+            <td>less cold than</td>
+          </tr>
+          <tr>
+            <td><strong>Equal</strong></td>
+            <td class="formula">tan + adj + como</td>
+            <td class="example">tan bonito como</td>
+            <td>as pretty as</td>
+          </tr>
+          <tr>
+            <td><strong>Superlative (most)</strong></td>
+            <td class="formula">el/la más + adj</td>
+            <td class="example">el más caliente</td>
+            <td>the hottest</td>
+          </tr>
+          <tr>
+            <td><strong>Superlative (least)</strong></td>
+            <td class="formula">el/la menos + adj</td>
+            <td class="example">la menos fría</td>
+            <td>the least cold</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 20px">
+        <div class="formula-box">
+          <div class="label">Example with seasons 🍂</div>
+          <div class="formula">El verano es más caliente que el invierno.</div>
+          <div class="ex">Summer is hotter than winter.</div>
+        </div>
+        <div class="formula-box">
+          <div class="label">Superlative example ☀️</div>
+          <div class="formula">El verano es la estación más caliente.</div>
+          <div class="ex">Summer is the hottest season.</div>
+        </div>
+        <div class="formula-box">
+          <div class="label">Equal comparison 🌸</div>
+          <div class="formula">La primavera es tan bonita como el otoño.</div>
+          <div class="ex">Spring is as pretty as fall.</div>
+        </div>
+      </div>
+
+      <div class="tip-box" style="margin-top: 16px">
+        💡 <strong>Watch out!</strong> <em>bueno</em> (good) and <em>malo</em> (bad) have irregular comparatives: <strong>mejor</strong> (better) and <strong>peor</strong> (worse) — just like "good → better" in English!
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ TAB -->
+  <div id="tab-quiz" class="tab-content hidden">
+    <div class="card" id="quizCard">
+      <div id="quizInner"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Stars background ----
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 50; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 3 + 1;
+  s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s`;
+  starsEl.appendChild(s);
+}
+
+// ---- Tabs ----
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  event.currentTarget.classList.add('active');
+  if (name === 'quiz') initQuiz();
+  updateProgress(name);
+}
+
+function updateProgress(tab) {
+  const map = { seasons: 25, months: 50, comparatives: 75, quiz: 100 };
+  document.getElementById('progressBar').style.width = (map[tab] || 0) + '%';
+}
+
+// ---- Seasons ----
+function toggleSeason(el) {
+  el.classList.toggle('open');
+}
+
+// ---- QUIZ DATA ----
+const questions = [
+  // Seasons
+  { q: "Which season comes after el invierno (winter)?", ctx: "Think about the order of seasons 🌍", options: ["la primavera", "el verano", "el otoño", "el invierno"], answer: 0, explain: "Spring (la primavera) follows winter! Spring → Summer → Fall → Winter → Spring..." },
+  { q: "¿En qué estación caen las hojas? (In which season do leaves fall?)", ctx: "", options: ["la primavera", "el verano", "el otoño", "el invierno"], answer: 2, explain: "El otoño (autumn/fall) is when leaves fall! 🍂" },
+  { q: "Which season contains the months junio, julio, agosto?", ctx: "Remember your season-month groups! ☀️", options: ["la primavera", "el verano", "el otoño", "el invierno"], answer: 1, explain: "El verano (summer) includes June, July, August — the hottest months!" },
+  { q: "What is the Spanish word for 'December'?", ctx: "Hint: it looks like the English word... 🎄", options: ["noviembre", "diciembre", "octubre", "enero"], answer: 1, explain: "diciembre = December. Notice how similar it looks!" },
+  { q: "Which month is 'February' in Spanish?", ctx: "It's the month of Valentine's Day! 💝", options: ["enero", "marzo", "febrero", "abril"], answer: 2, explain: "febrero = February. ¡Feliz San Valentín!" },
+  { q: "How do you say 'Summer is hotter than winter' in Spanish?", ctx: "Use the comparative formula: más + adj + que", options: ["El verano es menos caliente que el invierno.", "El verano es más caliente que el invierno.", "El verano es tan caliente como el invierno.", "El verano es el más caliente."], answer: 1, explain: "más + caliente + que = hotter than. El verano es MÁS caliente QUE el invierno. ☀️" },
+  { q: "What does 'el/la más + adjective' create?", ctx: "This is the superlative formula 🏆", options: ["A comparison (more than)", "An equal comparison (as...as)", "A superlative (the most)", "A negative (less than)"], answer: 2, explain: "el/la más + adj = the superlative! 'el más alto' = the tallest 🏆" },
+  { q: "Which formula means 'as ___ as'?", ctx: "Equal comparisons in Spanish", options: ["más ... que", "menos ... que", "tan ... como", "el/la más"], answer: 2, explain: "tan + adjective + como = as ___ as. 'tan alto como' = as tall as!" },
+  { q: "October in Spanish is:", ctx: "Hint: think 'octo' like octopus (8 arms)... it was the 8th month in the old calendar 🎃", options: ["septiembre", "noviembre", "agosto", "octubre"], answer: 3, explain: "octubre = October! The 'oct-' root is shared with English." },
+  { q: "The months marzo, abril, mayo belong to which season?", ctx: "Spring months in the Northern Hemisphere 🌷", options: ["el verano", "el invierno", "la primavera", "el otoño"], answer: 2, explain: "March, April, May = la primavera (spring)! Flowers blooming 🌸" },
+  { q: "How do you say 'less cold than' in Spanish?", ctx: "Negative comparative formula", options: ["más frío que", "menos frío que", "tan frío como", "el menos frío"], answer: 1, explain: "menos + frío + que = less cold than. Don't forget 'que' at the end!" },
+  { q: "In Spanish, months are written:", ctx: "Capitalization rule 📝", options: ["Always capitalized (Enero)", "Never capitalized (enero)", "Only if starting a sentence", "Depends on the season"], answer: 1, explain: "In Spanish, months are NEVER capitalized in the middle of a sentence — unlike English! enero, febrero, marzo..." },
+];
+
+let current = 0, score = 0, answered = false;
+
+function initQuiz() {
+  current = 0; score = 0; answered = false;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (current >= questions.length) { showScore(); return; }
+  const q = questions[current];
+  answered = false;
+  document.getElementById('quizInner').innerHTML = `
+    <h2>🎯 Quiz Time!</h2>
+    <div class="subtitle">Test what you've learned</div>
+    <div class="quiz-wrap">
+      <div class="quiz-question">${q.q}</div>
+      ${q.ctx ? `<div class="quiz-context">${q.ctx}</div>` : ''}
+      <div class="quiz-options" id="optionsGrid">
+        ${q.options.map((opt, i) => `<button class="opt-btn" onclick="checkAnswer(${i})">${opt}</button>`).join('')}
+      </div>
+      <div class="feedback-box" id="feedback"></div>
+      <div class="quiz-nav">
+        <span class="q-counter">Question ${current + 1} of ${questions.length} &nbsp;|&nbsp; ⭐ Score: ${score}</span>
+        <button class="btn btn-primary hidden" id="nextBtn" onclick="nextQ()">Next →</button>
+      </div>
+    </div>
+  `;
+}
+
+function checkAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[q.answer].classList.add('correct');
+  const fb = document.getElementById('feedback');
+  if (idx === q.answer) {
+    score++;
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback-box correct show';
+    fb.innerHTML = '✅ ¡Correcto! ' + q.explain;
+  } else {
+    btns[idx].classList.add('wrong');
+    fb.className = 'feedback-box wrong show';
+    fb.innerHTML = '💡 Not quite. ' + q.explain;
+  }
+  document.querySelector('.q-counter').textContent = `Question ${current + 1} of ${questions.length} | ⭐ Score: ${score}`;
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+function nextQ() {
+  current++;
+  renderQuestion();
+}
+
+function showScore() {
+  const pct = Math.round((score / questions.length) * 100);
+  let badge, msg;
+  if (pct >= 90) { badge = '🏆'; msg = '¡Excelente! You\'re a Spanish star!'; }
+  else if (pct >= 75) { badge = '🌟'; msg = '¡Muy bien! Great job!'; }
+  else if (pct >= 60) { badge = '😊'; msg = '¡Bien! Keep practicing!'; }
+  else { badge = '💪'; msg = 'Keep studying — you\'ve got this!'; }
+
+  document.getElementById('quizInner').innerHTML = `
+    <div class="score-screen">
+      <h2>¡Terminado! Quiz Complete!</h2>
+      <span class="score-badge">${badge}</span>
+      <div class="big-score">${score}/${questions.length}</div>
+      <p>${pct}% — ${msg}</p>
+      <div style="margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="initQuiz()">🔄 Try Again</button>
+        <button class="btn btn-secondary" onclick="showTab('seasons')">📚 Review Lessons</button>
+      </div>
+    </div>
+  `;
+  if (pct >= 75) launchConfetti();
+}
+
+function launchConfetti() {
+  const colors = ['#FFD93D','#FF6B6B','#6BCB77','#4D96FF','#C77DFF'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.cssText = `
+        left: ${Math.random()*100}vw;
+        top: -20px;
+        background: ${colors[Math.floor(Math.random()*colors.length)]};
+        width: ${6+Math.random()*8}px;
+        height: ${6+Math.random()*8}px;
+        animation-duration: ${1.5+Math.random()*2}s;
+        animation-delay: ${Math.random()*0.5}s;
+        transform: rotate(${Math.random()*360}deg);
+      `;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3000);
+    }, i * 30);
+  }
+}
+</script>
+</body>
+</html>

@@ -175,6 +175,21 @@
     font-style: italic;
   }
 
+  /* ── RETURNING USER NOTE ── */
+  .returning-note {
+    background: rgba(74,94,58,0.1);
+    border: 1px solid rgba(74,94,58,0.35);
+    border-radius: 3px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    font-style: italic;
+    color: var(--sage);
+    margin-bottom: 18px;
+    text-align: center;
+    display: none;
+  }
+  .returning-note.visible { display: block; }
+
   /* ── BUTTONS ── */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -451,20 +466,6 @@
   }
   .results-actions .btn { flex: 1; min-width: 140px; }
 
-  /* ── WELCOME BANNER ── */
-  .welcome-back {
-    background: rgba(74,94,58,0.12);
-    border: 1px solid rgba(74,94,58,0.4);
-    border-radius: 3px;
-    padding: 10px 16px;
-    font-size: 0.9rem;
-    font-style: italic;
-    color: var(--sage);
-    margin-bottom: 18px;
-    text-align: center;
-    display: none;
-  }
-
   /* ── ANIMATIONS ── */
   @keyframes fadeDown { from { opacity:0; transform: translateY(-16px); } to { opacity:1; transform: none; } }
   @keyframes fadeUp   { from { opacity:0; transform: translateY(16px);  } to { opacity:1; transform: none; } }
@@ -482,6 +483,23 @@
     color: rgba(244,234,213,0.35);
     text-transform: uppercase;
   }
+
+  /* ── CLEAR DATA LINK ── */
+  .clear-data-link {
+    background: none;
+    border: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(139,26,26,0.45);
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.2s;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .clear-data-link:hover { color: var(--crimson); }
 
   /* ── ERROR ── */
   .error-msg {
@@ -598,16 +616,21 @@
 
   <div class="divider"><span>Register or Return</span></div>
 
-  <div id="welcome-back-msg" class="welcome-back"></div>
+  <!-- Shown when a returning user is detected by email -->
+  <div class="returning-note" id="returning-note"></div>
+
+  <!-- Email — always required; serves as the unique account key -->
+  <div class="field-group">
+    <label for="input-email">Email Address</label>
+    <input type="email" id="input-email" placeholder="e.g. thomas@example.com"
+           autocomplete="off" oninput="checkReturningUser()">
+    <p class="field-hint">Your email identifies your account. Returning? Just enter your email &amp; PIN to resume.</p>
+  </div>
 
   <div class="field-group">
-    <label for="input-name">Your Full Name</label>
-    <input type="text" id="input-name" placeholder="e.g. Thomas Jefferson" autocomplete="off">
-  </div>
-  <div class="field-group">
-    <label for="input-pin">4-Digit PIN</label>
-    <input type="password" id="input-pin" placeholder="••••" maxlength="4" inputmode="numeric">
-    <p class="field-hint">First time? Choose any 4 digits to remember. Returning? Enter your same PIN to resume.</p>
+    <label for="input-pin">7-Digit PIN</label>
+    <input type="password" id="input-pin" placeholder="•••••••" maxlength="7" inputmode="numeric">
+    <p class="field-hint">First time? Choose any 7 digits. Returning? Enter the same PIN you used before.</p>
   </div>
 
   <div class="divider"><span>First Time Only</span></div>
@@ -616,9 +639,9 @@
   </p>
 
   <div class="field-group">
-    <label for="input-email">Email Address</label>
-    <input type="email" id="input-email" placeholder="e.g. thomas@example.com" autocomplete="off">
-    <p class="field-hint">Used to contact you about your certificate. Not shared publicly.</p>
+    <label for="input-name">Full Name</label>
+    <input type="text" id="input-name" placeholder="e.g. Thomas Jefferson" autocomplete="off">
+    <p class="field-hint">Used on your certificate. Not required if returning.</p>
   </div>
   <div class="field-group">
     <label for="input-phone">Phone Number</label>
@@ -635,6 +658,10 @@
 
   <div style="margin-top:8px;">
     <button class="btn btn-primary" onclick="handleLogin()">Enter the Course →</button>
+  </div>
+
+  <div style="text-align:center; margin-top:18px;">
+    <button class="clear-data-link" onclick="clearSavedData()">✦ Clear My Saved Information</button>
   </div>
 </div>
 
@@ -719,29 +746,12 @@
 
 <script>
 // ═══════════════════════════════════════════════
-//  ANSWER KEY — XOR encoded, never stored as
-//  plain integers. Decoded only at comparison
-//  time, in a local scope, never assigned to a
-//  persistent variable.
-//
-//  Encoding: encoded[i] = (correctIndex ^ _k ^ i) & 0xFF
-//  _k is derived at runtime from the page fingerprint,
-//  not hardcoded in the data array itself.
+//  ANSWER KEY — XOR encoded
 // ═══════════════════════════════════════════════
 (function() {
-  // Runtime key derivation — combines a fixed seed with
-  // a value derived from the DOM so it can't be trivially
-  // replayed outside this page context.
   const _s = [72,101,110,114,121,67,111,117,110,116,121];
-  const _base = _s.reduce((a, b) => a ^ b, 0x1F); // yields 0x5A
-
-  // Encoded answer table — these are meaningless without _base
-  // (they look like arbitrary integers, not 0–3 answer indices)
+  const _base = _s.reduce((a, b) => a ^ b, 0x1F);
   const _enc = [88,89,88,91,95,92,93,92,81,81,83,80,84,87,86,84,72,74,73,74];
-
-  // Expose a single decode function — returns the correct answer
-  // index for a given question's position in allQuestions[]
-  // Only called inside selectAnswer() in a temporary local variable.
   window._decodeAnswer = function(questionIndex) {
     return (_enc[questionIndex] ^ _base ^ questionIndex) & 0xFF;
   };
@@ -789,12 +799,6 @@ const lessons = [
   }
 ];
 
-// ═══════════════════════════════════════════════
-//  QUESTIONS — answer field removed entirely.
-//  Correct answer is resolved at runtime via
-//  _decodeAnswer(originalIndex) where originalIndex
-//  is the question's stable position in this array.
-// ═══════════════════════════════════════════════
 const allQuestions = [
   {
     _i: 0,
@@ -938,6 +942,7 @@ const allQuestions = [
 // ═══════════════════════════════════════════════
 let state = {
   name: '',
+  email: '',
   currentLesson: 0,
   quizQuestions: [],
   currentQ: 0,
@@ -945,30 +950,53 @@ let state = {
   answered: false
 };
 
+// ── Storage key is now derived from email (normalized) ──
+function emailToKey(email) {
+  return 'hc250_' + email.toLowerCase().trim().replace(/[^a-z0-9@._-]/g, '_');
+}
+
 function saveState() {
   try {
-    const key = 'hc250_' + state.name.toLowerCase().replace(/\s+/g, '_');
-    // Never persist decoded answers — only store the user's chosen option index
-    localStorage.setItem(key, JSON.stringify(state));
-    localStorage.setItem('hc250_current_user', state.name);
+    localStorage.setItem(emailToKey(state.email), JSON.stringify(state));
+    localStorage.setItem('hc250_current_email', state.email.toLowerCase().trim());
   } catch(e) {}
 }
 
-function loadState(name) {
+function loadStateByEmail(email) {
   try {
-    const key = 'hc250_' + name.toLowerCase().replace(/\s+/g, '_');
-    const s = JSON.parse(localStorage.getItem(key) || 'null');
-    if (s && s.name) return s;
+    const s = JSON.parse(localStorage.getItem(emailToKey(email)) || 'null');
+    if (s && s.email) return s;
   } catch(e) {}
   return null;
 }
 
-function getCurrentUser() {
-  try { return localStorage.getItem('hc250_current_user') || null; } catch(e) { return null; }
+function getCurrentEmail() {
+  try { return localStorage.getItem('hc250_current_email') || null; } catch(e) { return null; }
 }
 
-function clearCurrentUser() {
-  try { localStorage.removeItem('hc250_current_user'); } catch(e) {}
+function clearCurrentEmail() {
+  try { localStorage.removeItem('hc250_current_email'); } catch(e) {}
+}
+
+// ── Detect returning user as email is typed ──
+function checkReturningUser() {
+  const email = document.getElementById('input-email').value.trim().toLowerCase();
+  const note  = document.getElementById('returning-note');
+  const nameGroup = document.getElementById('name-group');
+  const phoneGroup = document.getElementById('phone-group');
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    note.classList.remove('visible');
+    return;
+  }
+
+  const saved = loadStateByEmail(email);
+  if (saved && saved.pin) {
+    note.textContent = `✦ Welcome back, ${saved.name || 'returning participant'}! Enter your PIN to resume where you left off.`;
+    note.classList.add('visible');
+  } else {
+    note.classList.remove('visible');
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -992,9 +1020,9 @@ function showScreen(id) {
 //  AUTO-RESUME ON PAGE LOAD
 // ═══════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  const currentUser = getCurrentUser();
-  if (currentUser) {
-    const saved = loadState(currentUser);
+  const currentEmail = getCurrentEmail();
+  if (currentEmail) {
+    const saved = loadStateByEmail(currentEmail);
     if (saved) {
       state = { ...saved };
       if (state.completedAndPassed) {
@@ -1017,58 +1045,61 @@ window.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════════
 function signOut() {
   showModal(
-    'This will sign you out. Your progress is saved and you can return anytime with your name and PIN.',
+    'This will sign you out. Your progress is saved and you can return anytime with your email and PIN.',
     () => {
-      clearCurrentUser();
-      state = { name: '', currentLesson: 0, quizQuestions: [], currentQ: 0, score: 0, answered: false };
-      document.getElementById('input-name').value = '';
+      clearCurrentEmail();
+      state = { name: '', email: '', currentLesson: 0, quizQuestions: [], currentQ: 0, score: 0, answered: false };
+      document.getElementById('input-name').value  = '';
       document.getElementById('input-email').value = '';
       document.getElementById('input-phone').value = '';
-      document.getElementById('input-pin').value = '';
+      document.getElementById('input-pin').value   = '';
+      document.getElementById('returning-note').classList.remove('visible');
       showScreen('screen-login');
     }
   );
 }
 
 // ═══════════════════════════════════════════════
-//  LOGIN
+//  LOGIN  (email is now the unique key)
 // ═══════════════════════════════════════════════
 function handleLogin() {
-  const name     = document.getElementById('input-name').value.trim();
   const email    = document.getElementById('input-email').value.trim();
-  const phone    = document.getElementById('input-phone').value.trim();
   const pin      = document.getElementById('input-pin').value.trim();
+  const name     = document.getElementById('input-name').value.trim();
+  const phone    = document.getElementById('input-phone').value.trim();
   const honeypot = document.getElementById('input-website').value.trim();
   const err      = document.getElementById('login-error');
 
   if (honeypot) return;
 
-  if (!name) {
+  // Email is always required
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     err.style.display = 'block';
-    err.textContent = 'Please enter your full name.';
+    err.textContent = 'Please enter a valid email address.';
     return;
   }
-  if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+
+  // PIN is always required
+  if (pin.length !== 7 || !/^\d{7}$/.test(pin)) {
     err.style.display = 'block';
-    err.textContent = 'Please enter a 4-digit numeric PIN.';
+    err.textContent = 'Please enter a 7-digit numeric PIN.';
     return;
   }
   err.style.display = 'none';
 
-  const saved = loadState(name);
+  const saved       = loadStateByEmail(email);
   const isReturning = !!(saved && saved.pin);
 
   if (isReturning) {
-    // Returning user — PIN must match, email/phone not required
+    // ── Returning user: PIN must match ──
     if (saved.pin !== pin) {
       err.style.display = 'block';
-      err.textContent = 'Incorrect PIN for that name. If you have forgotten your PIN, please use a different name to start fresh.';
+      err.textContent = 'Incorrect PIN for that email address. If you have forgotten your PIN, use a different email to start fresh.';
       return;
     }
     state = { ...saved };
-    state.name = name;
-    // Only update contact info if they actually filled it in this time
-    if (email) state.email = email;
+    // Update name/phone if the user filled them in again
+    if (name)  state.name  = name;
     if (phone) state.phone = phone;
     saveState();
 
@@ -1077,10 +1108,10 @@ function handleLogin() {
       return;
     }
   } else {
-    // New user — email and phone are required
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    // ── New user: name and phone are required ──
+    if (!name) {
       err.style.display = 'block';
-      err.textContent = 'First-time participants must enter a valid email address.';
+      err.textContent = 'First-time participants must enter their full name.';
       return;
     }
     if (!phone) {
@@ -1196,7 +1227,6 @@ function renderQuestion() {
     state.answerOrder[state.currentQ] = indices;
   }
 
-  // Decode the correct answer only here, in a local const, never stored
   const correctAnswer = _decodeAnswer(q._i);
 
   indices.forEach(i => {
@@ -1237,7 +1267,6 @@ function selectAnswer(chosenIdx, btn, q, correctAnswer) {
     state.score++;
   } else {
     btn.classList.add('wrong');
-    // Highlight the correct answer button
     allBtns.forEach(b => {
       const cleanText = b.textContent.replace(' ✓','').replace(' ✗','');
       if (cleanText === q.options[correctAnswer]) {
@@ -1276,7 +1305,6 @@ function nextQuestion() {
 function showResults() {
   const total = state.quizQuestions.length;
 
-  // Recalculate score from scratch using decoded answers — prevents tampering
   let freshScore = 0;
   state.quizQuestions.forEach((q, idx) => {
     const correct = _decodeAnswer(q._i);
@@ -1347,6 +1375,60 @@ function sendPassEmail(name, score, total) {
   emailjs.send('service_immj0jg', 'template_mneo0hm', templateParams)
     .then(() => { console.log('Certificate notification sent.'); })
     .catch((err) => { console.warn('Email notification failed:', err); });
+}
+
+// ═══════════════════════════════════════════════
+//  CLEAR SAVED DATA
+// ═══════════════════════════════════════════════
+function clearSavedData() {
+  const email = document.getElementById('input-email').value.trim();
+  const hasEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const currentEmail = getCurrentEmail();
+
+  if (!hasEmail && !currentEmail) {
+    // Nothing to clear — give a gentle notice via the error field
+    const err = document.getElementById('login-error');
+    err.style.display = 'block';
+    err.style.color = 'var(--gold)';
+    err.textContent = 'Enter your email address above to identify which record to clear.';
+    setTimeout(() => {
+      err.style.display = 'none';
+      err.style.color = '';
+    }, 4000);
+    return;
+  }
+
+  const targetEmail = hasEmail ? email : currentEmail;
+
+  showModal(
+    `⚠️ This will permanently delete all saved progress, quiz scores, and account information for ${targetEmail}. This cannot be undone. Are you sure?`,
+    () => {
+      try {
+        localStorage.removeItem(emailToKey(targetEmail));
+        if (currentEmail && currentEmail.toLowerCase() === targetEmail.toLowerCase()) {
+          clearCurrentEmail();
+        }
+      } catch(e) {}
+
+      // Reset form fields
+      document.getElementById('input-name').value  = '';
+      document.getElementById('input-email').value = '';
+      document.getElementById('input-phone').value = '';
+      document.getElementById('input-pin').value   = '';
+      document.getElementById('returning-note').classList.remove('visible');
+
+      state = { name: '', email: '', currentLesson: 0, quizQuestions: [], currentQ: 0, score: 0, answered: false };
+
+      const err = document.getElementById('login-error');
+      err.style.display = 'block';
+      err.style.color = 'var(--sage)';
+      err.textContent = '✦ Your saved information has been cleared.';
+      setTimeout(() => {
+        err.style.display = 'none';
+        err.style.color = '';
+      }, 4000);
+    }
+  );
 }
 
 // ═══════════════════════════════════════════════
